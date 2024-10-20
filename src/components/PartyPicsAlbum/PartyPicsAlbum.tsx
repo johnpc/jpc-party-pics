@@ -3,7 +3,7 @@ import { FileUploader } from "@aws-amplify/ui-react-storage";
 import QRCode from "react-qr-code";
 import { Divider, Grid, Text, useTheme, View } from "@aws-amplify/ui-react";
 import { CopyLink } from "./CopyLink";
-import { SharedPhotos } from "./SharedPhotos";
+import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
 import { useState } from "react";
 
 const qrSize = 256;

@@ -1,7 +1,7 @@
 import "@aws-amplify/ui-react/styles.css";
 import { Amplify } from "aws-amplify";
 import config from "../amplify_outputs.json";
-import { PartyPicsAlbum } from "./components/PartyPicsAlbum";
+import { PartyPicsAlbum } from "./components/PartyPicsAlbum/PartyPicsAlbum";
 import { CreateAlbum } from "./components/CreateAlbum";
 import { Header } from "./components/Header";
 import { Divider, useTheme } from "@aws-amplify/ui-react";

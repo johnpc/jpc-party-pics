@@ -10,7 +10,7 @@ import {
 } from "@aws-amplify/ui-react";
 import { StorageImage } from "@aws-amplify/ui-react-storage";
 import { generateClient } from "aws-amplify/api";
-import { Schema } from "../../amplify/data/resource";
+import { Schema } from "../../../../amplify/data/resource";
 import { useEffect, useState } from "react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -44,6 +44,7 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
 
 import { getUrl } from "aws-amplify/storage";
 import { Modal } from "@mui/material";
+import { SharedImage } from "./SharedImage";
 
 const downloadFile = async (key: string) => {
   const url = await getUrl({
@@ -222,30 +223,12 @@ export const SharedPhotos = (props: {
         }
       >
         {(image, index) => (
-          <Card
+          <SharedImage
+            image={image}
             key={index}
-            borderRadius="large"
-            variation="elevated"
-            backgroundColor={"white"}
-            borderColor={"white"}
-            boxShadow={"none"}
-            width={isMobileScreenSize ? "45%" : undefined}
-            textAlign={"center"}
-            padding={tokens.space.xxxs}
-          >
-            <StorageImage
-              style={{
-                borderRadius: tokens.radii.large.value,
-                height: "100%",
-                maxHeight: "30vh",
-                objectFit: "cover",
-              }}
-              key={image.key}
-              alt={image.key}
-              path={image.key}
-              onClick={() => handleOpenModal(image)}
-            />
-          </Card>
+            isMobileScreenSize={isMobileScreenSize}
+            handleOpenModal={handleOpenModal}
+          />
         )}
       </Collection>
       <Button
