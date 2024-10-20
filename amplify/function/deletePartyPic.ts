@@ -18,6 +18,7 @@ export const handler: Schema["deletePartyPic"]["functionHandler"] = async (
 
   return {
     size: 0,
+    date: new Date().toLocaleString(),
     key: input.arguments.key,
   };
 };

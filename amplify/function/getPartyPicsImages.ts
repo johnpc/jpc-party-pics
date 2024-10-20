@@ -18,6 +18,7 @@ export const handler: Schema["getPartyPicsImages"]["functionHandler"] = async (
       .map((i) => ({
         key: i.Key!,
         size: i.Size!,
+        date: i.LastModified!.toLocaleString(),
       }))
       .filter((t) => t) ?? [];
   return {

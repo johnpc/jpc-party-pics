@@ -10,7 +10,6 @@ function App() {
   const { tokens } = useTheme();
 
   const albumName = window.location.pathname.split("/")[1];
-  console.log({ albumName });
   return (
     <>
       <Header />

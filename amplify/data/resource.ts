@@ -11,6 +11,13 @@ const schema = a.schema({
       albumName: a.string().required(),
     })
     .authorization((allow) => [allow.guest()]),
+  AlbumImageKey: a
+    .model({
+      albumName: a.string().required(),
+      imageKey: a.string().required(),
+    })
+    .identifier(["imageKey"])
+    .authorization((allow) => [allow.guest()]),
   ZipFile: a.customType({
     key: a.string().required(),
     size: a.integer().required(),
@@ -18,6 +25,7 @@ const schema = a.schema({
   Image: a.customType({
     key: a.string().required(),
     size: a.integer().required(),
+    date: a.string().required(),
   }),
   ImageList: a.customType({
     images: a.ref("Image").required().array().required(),

@@ -86,6 +86,29 @@ export const SharedPhotos = (props: {
     fetchImages();
   }, [lastDeleteTime, props.albumName, props.lastUploadTime]);
 
+  useEffect(() => {
+    const createListener = client.models.AlbumImageKey.onCreate().subscribe({
+      next: async () => {
+        setLastDeleteTime(new Date());
+      },
+      error: (error: Error) => {
+        console.error("Subscription error", error);
+      },
+    })
+    const deleteListener = client.models.AlbumImageKey.onDelete().subscribe({
+      next: async () => {
+        setLastDeleteTime(new Date());
+      },
+      error: (error: Error) => {
+        console.error("Subscription error", error);
+      },
+    })
+    return () => {
+      deleteListener.unsubscribe();
+      createListener.unsubscribe();
+    }
+  }, [images])
+
   const deleteFile = async (key: string) => {
     const confirmed = confirm(
       `Are you sure? This action is destructive. The image can never be recovered.`,
@@ -93,6 +116,7 @@ export const SharedPhotos = (props: {
     if (!confirmed) return;
 
     await client.queries.deletePartyPic({ key });
+    await client.models.AlbumImageKey.delete({ imageKey: key })
     setLastDeleteTime(new Date());
     setOpenModalImage(undefined);
   };
@@ -131,6 +155,7 @@ export const SharedPhotos = (props: {
     handleOpenModal(images[forwardIndex]);
   };
 
+  images.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   return (
     <>
       <Modal
@@ -141,7 +166,6 @@ export const SharedPhotos = (props: {
       >
         <Card
           onKeyUpCapture={(event) => {
-            console.log({ event });
             if (event.keyCode === 39) {
               handleForwardImage(openModalImage!);
             }
@@ -203,6 +227,7 @@ export const SharedPhotos = (props: {
       />
       <Collection
         items={images}
+        key={images.length.toFixed()}
         type="list"
         direction="row"
         gap={tokens.space.medium}

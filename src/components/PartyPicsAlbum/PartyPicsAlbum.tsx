@@ -5,6 +5,9 @@ import { Divider, Grid, Text, useTheme, View } from "@aws-amplify/ui-react";
 import { CopyLink } from "./CopyLink";
 import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
 import { useState } from "react";
+import { generateClient } from "aws-amplify/api";
+import { Schema } from "../../../amplify/data/resource";
+const client = generateClient<Schema>();
 
 const qrSize = 256;
 export const PartyPicsAlbum = (props: { albumName: string }) => {
@@ -14,6 +17,14 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
   let path = window.location.pathname;
   if (path.endsWith("/")) {
     path = path.slice(0, -1);
+  }
+
+  const onSuccess = async (event: {key?: string|undefined}) => {
+    setLastUploadTime(new Date());
+    await client.models.AlbumImageKey.create({
+      imageKey: event.key!,
+      albumName: props.albumName,
+    })
   }
 
   return (
@@ -42,7 +53,7 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
             maxFileCount={1000}
             isResumable
             useAccelerateEndpoint
-            onUploadSuccess={() => setLastUploadTime(new Date())}
+            onUploadSuccess={onSuccess}
           />
         </View>
       </Grid>
