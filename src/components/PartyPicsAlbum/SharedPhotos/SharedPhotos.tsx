@@ -8,7 +8,6 @@ import {
   Text,
   useTheme,
 } from "@aws-amplify/ui-react";
-import { StorageImage } from "@aws-amplify/ui-react-storage";
 import { generateClient } from "aws-amplify/api";
 import { Schema } from "../../../../amplify/data/resource";
 import { useEffect, useState } from "react";
@@ -45,6 +44,8 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
 import { getUrl } from "aws-amplify/storage";
 import { Modal } from "@mui/material";
 import { SharedImage } from "./SharedImage";
+import { ModalImage } from "./ModalImage";
+import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
 
 const downloadFile = async (key: string) => {
   const url = await getUrl({
@@ -72,7 +73,6 @@ export const SharedPhotos = (props: {
   const [lastDeleteTime, setLastDeleteTime] = useState(new Date());
   const [openModalImage, setOpenModalImage] =
     useState<Schema["Image"]["type"]>();
-  const isMobileScreenSize = document.documentElement.clientWidth < 1000;
   useEffect(() => {
     setLoading(true);
     const fetchImages = async () => {
@@ -88,26 +88,35 @@ export const SharedPhotos = (props: {
 
   useEffect(() => {
     const createListener = client.models.AlbumImageKey.onCreate().subscribe({
-      next: async () => {
-        setLastDeleteTime(new Date());
+      next: async (imageKey: Schema["AlbumImageKey"]["type"]) => {
+        if (imageKey.albumName === props.albumName) {
+          setImages([
+            {
+              size: 0,
+              date: new Date().toLocaleString(),
+              key: imageKey.imageKey,
+            },
+            ...images,
+          ]);
+        }
       },
       error: (error: Error) => {
         console.error("Subscription error", error);
       },
-    })
+    });
     const deleteListener = client.models.AlbumImageKey.onDelete().subscribe({
-      next: async () => {
-        setLastDeleteTime(new Date());
+      next: async (imageKey: Schema["AlbumImageKey"]["type"]) => {
+        setImages(images.filter((i) => i.key !== imageKey.imageKey));
       },
       error: (error: Error) => {
         console.error("Subscription error", error);
       },
-    })
+    });
     return () => {
       deleteListener.unsubscribe();
       createListener.unsubscribe();
-    }
-  }, [images])
+    };
+  }, [images]);
 
   const deleteFile = async (key: string) => {
     const confirmed = confirm(
@@ -116,7 +125,7 @@ export const SharedPhotos = (props: {
     if (!confirmed) return;
 
     await client.queries.deletePartyPic({ key });
-    await client.models.AlbumImageKey.delete({ imageKey: key })
+    await client.models.AlbumImageKey.delete({ imageKey: key });
     setLastDeleteTime(new Date());
     setOpenModalImage(undefined);
   };
@@ -144,18 +153,21 @@ export const SharedPhotos = (props: {
   };
 
   const handleBackImage = (image: Schema["Image"]["type"]) => {
-    const index = images.indexOf(image);
+    const index = images.findIndex((i) => i.key === image.key);
     const backIndex = index === 0 ? images.length - 1 : index - 1;
     handleOpenModal(images[backIndex]);
   };
 
   const handleForwardImage = (image: Schema["Image"]["type"]) => {
-    const index = images.indexOf(image);
+    const index = images.findIndex((i) => i.key === image.key);
     const forwardIndex = index === images.length - 1 ? 0 : index + 1;
     handleOpenModal(images[forwardIndex]);
   };
 
-  images.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // images.sort(
+  //   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  // );
+
   return (
     <>
       <Modal
@@ -183,26 +195,16 @@ export const SharedPhotos = (props: {
                 fontSize={isMobileScreenSize ? "medium" : "large"}
               />
             </Text>
-            <StorageImage
-              style={{
-                width: "80%",
-                height: "80%",
-                maxHeight: "80vh",
-                objectFit: "contain",
-                verticalAlign: "middle",
-              }}
-              key={openModalImage?.key ?? ""}
-              alt={openModalImage?.key ?? ""}
-              path={openModalImage?.key ?? ""}
-            />{" "}
+            <ModalImage key={openModalImage?.key} image={openModalImage!} />{" "}
             <Text as="span" onClick={() => handleForwardImage(openModalImage!)}>
               <ArrowForwardIosIcon
                 fontSize={isMobileScreenSize ? "medium" : "large"}
               />
             </Text>
             <Button
-              isFullWidth
+              display={"inline"}
               variation="link"
+              isFullWidth
               padding={tokens.space.medium}
               onClick={() => downloadFile(openModalImage?.key ?? "")}
             >
@@ -247,11 +249,10 @@ export const SharedPhotos = (props: {
           )
         }
       >
-        {(image, index) => (
+        {(image) => (
           <SharedImage
             image={image}
-            key={index}
-            isMobileScreenSize={isMobileScreenSize}
+            key={image.key}
             handleOpenModal={handleOpenModal}
           />
         )}
@@ -266,11 +267,12 @@ export const SharedPhotos = (props: {
       >
         {downloadAllLoading ? (
           <>
-            <Loader /> This could take a while...
+            <Loader marginRight={tokens.space.small} /> This could take a
+            while...
           </>
         ) : (
           <>
-            Download All (
+            Download All {images.length} files (
             {humanFileSize(images.reduce((acc, image) => acc + image.size, 0))})
           </>
         )}

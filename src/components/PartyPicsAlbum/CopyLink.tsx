@@ -1,12 +1,12 @@
 import { Button, useTheme } from "@aws-amplify/ui-react";
 import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { isMobileScreenSize } from "../../helpers/isMobileScreenSize";
 
 export const CopyLink = (props: { link: string }) => {
   const { tokens } = useTheme();
   const [copied, setCopied] = useState(false);
   const fileUrl = props.link;
-  const isMobileScreenSize = document.documentElement.clientWidth < 1000;
   return (
     <CopyToClipboard
       text={fileUrl}

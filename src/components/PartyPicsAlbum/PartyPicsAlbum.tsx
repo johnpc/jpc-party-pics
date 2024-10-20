@@ -19,13 +19,13 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
     path = path.slice(0, -1);
   }
 
-  const onSuccess = async (event: {key?: string|undefined}) => {
+  const onSuccess = async (event: { key?: string | undefined }) => {
     setLastUploadTime(new Date());
     await client.models.AlbumImageKey.create({
       imageKey: event.key!,
       albumName: props.albumName,
-    })
-  }
+    });
+  };
 
   return (
     <>
@@ -48,8 +48,8 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
         </View>
         <View columnStart="2" columnEnd="-1">
           <FileUploader
-            acceptedFileTypes={["image/*"]}
-            path={`public/${props.albumName}`}
+            acceptedFileTypes={["image/*", "video/*"]}
+            path={`public/${props.albumName}/`}
             maxFileCount={1000}
             isResumable
             useAccelerateEndpoint

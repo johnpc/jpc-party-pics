@@ -16,12 +16,7 @@ export const Header = () => {
   };
 
   return (
-    <Grid
-      templateColumns="3fr 1fr"
-      templateRows="4rem"
-      gap={tokens.space.small}
-      marginBottom={tokens.space.medium}
-    >
+    <Grid templateColumns="4fr" templateRows="4rem" gap={tokens.space.small}>
       <View>
         <Card onClick={() => goHome()}>
           <Flex
@@ -44,7 +39,7 @@ export const Header = () => {
             <View height="2rem">
               <Heading level={5}>partypics.jpc.io</Heading>
               <Text as="span" fontSize={"small"}>
-                Share event photos
+                Collaborative event photos
               </Text>
             </View>
           </Flex>

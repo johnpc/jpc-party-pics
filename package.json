@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint": "eslint . && npm run spell-check",
     "preview": "vite preview",
     "sandbox": "ampx sandbox --profile personal --once",
     "prod-config": "ampx generate outputs --app-id d131sf2ylw1gxp --branch main --profile personal",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "spell-check": "cspell \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.5.4",
@@ -23,6 +24,8 @@
     "react": "^18.3.1",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.3.1",
+    "react-html5video": "^2.5.1",
+    "react-player": "^2.16.0",
     "react-qr-code": "^2.0.15"
   },
   "devDependencies": {
@@ -36,6 +39,7 @@
     "aws-cdk": "^2.162.1",
     "aws-cdk-lib": "^2.162.1",
     "constructs": "^10.4.2",
+    "cspell": "^8.15.4",
     "esbuild": "^0.24.0",
     "eslint": "^9.11.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",

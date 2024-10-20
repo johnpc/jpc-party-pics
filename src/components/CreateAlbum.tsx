@@ -68,7 +68,7 @@ export const CreateAlbum = () => {
   return (
     <>
       <Text as="h1" fontSize={"medium"} marginBottom={tokens.space.small}>
-        Free zero-registration collaborrative photo album for hosting a wedding,
+        Free zero-registration collaborative photo album for hosting a wedding,
         birthday bash, corporate event, or anything else! Join our{" "}
         <Link href="/Demo">demo album</Link> to see if partypics.jpc.io is right
         for you.
@@ -121,9 +121,15 @@ export const CreateAlbum = () => {
         <ul style={{ margin: "0px" }}>
           <li>Easy-to-use interface for all ages</li>
           <li>Share access to your party album via link or qr code</li>
-          <li>Instant photo uploads from all guests</li>
+          <li>Instant photo and video uploads from all guests with the link</li>
           <li>High-quality image storage</li>
-          <li>Download options for individuals or entire albums</li>
+          <li>Download options for individual files or the entire album</li>
+          <li>
+            Software is{" "}
+            <Link href="https://github.com/johnpc/jpc-party-pics">
+              open source and self-hostable with one click
+            </Link>
+          </li>
           <li>The best part, completely FREE. No registration required.</li>
         </ul>
       </Text>
