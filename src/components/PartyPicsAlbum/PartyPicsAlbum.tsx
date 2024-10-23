@@ -43,7 +43,7 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
             viewBox={`0 0 ${qrSize} ${qrSize}`}
           />
           <Text fontSize={tokens.fontSizes.small}>
-            Share this album via QR code or copy link
+            Share this album link via QR code or copy/paste
           </Text>
         </View>
         <View columnStart="2" columnEnd="-1">

@@ -21,7 +21,7 @@ export const CopyLink = (props: { link: string }) => {
         isFullWidth={isMobileScreenSize}
         colorTheme={copied ? "success" : undefined}
       >
-        {copied ? "✅" : "Copy link to Clipboard"}
+        {copied ? "✅" : "Copy Album Link"}
       </Button>
     </CopyToClipboard>
   );
