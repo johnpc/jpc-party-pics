@@ -23,6 +23,11 @@ const makeHash = (length: number): string => {
 export const handler: Schema["getPartyPicsZipFile"]["functionHandler"] = async (
   input,
 ) => {
+  // When invoked via function url to avoid 30 second timeout
+  const albumName = (input as unknown as { body: string }).body
+    ? JSON.parse((input as unknown as { body: string }).body).albumName
+    : input.arguments.albumName;
+  console.log({ albumName });
   const bucketName = env.PARTYPICS_BUCKET_NAME;
   const s3 = new S3Client();
   const zip = new JSZip();
@@ -30,7 +35,7 @@ export const handler: Schema["getPartyPicsZipFile"]["functionHandler"] = async (
   const listedObjects = await s3.send(
     new ListObjectsV2Command({
       Bucket: bucketName,
-      Prefix: `public/${input.arguments.albumName}`,
+      Prefix: `public/${albumName}`,
     }),
   );
 

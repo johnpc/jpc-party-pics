@@ -13,7 +13,7 @@ import { Schema } from "../../../../amplify/data/resource";
 import { useEffect, useState } from "react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-
+import { custom } from "../../../../amplify_outputs.json";
 const client = generateClient<Schema>();
 const itemsPerPage = 24;
 
@@ -137,10 +137,23 @@ export const SharedPhotos = (props: {
     if (!confirmed) return;
 
     setDownloadAllLoading(true);
-    const zipFileResult = await client.queries.getPartyPicsZipFile({
-      albumName: props.albumName,
-    });
-    await downloadFile(zipFileResult.data!.key);
+    // const zipFileResult = await client.queries.getPartyPicsZipFile({
+    //   albumName: props.albumName,
+    // });
+    try {
+      const zipFileResponse = await fetch(custom.zipFileEndpoint, {
+        method: "POST",
+        body: JSON.stringify({ albumName: props.albumName }),
+      });
+      const zipFileResult = await zipFileResponse.json();
+
+      console.log({ zipFileResult });
+      await downloadFile(zipFileResult.key ?? zipFileResult.data!.key);
+    } catch (error) {
+      alert(`Error downloading zip file: ${(error as Error).message}`);
+      console.error(error);
+    }
+
     setDownloadAllLoading(false);
   };
 
