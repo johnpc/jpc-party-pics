@@ -9,10 +9,25 @@ import { generateClient } from "aws-amplify/api";
 import { Schema } from "../../../amplify/data/resource";
 const client = generateClient<Schema>();
 
+const makeHash = (length: number): string => {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+};
+
 const qrSize = 256;
 export const PartyPicsAlbum = (props: { albumName: string }) => {
   const { tokens } = useTheme();
   const [lastUploadTime, setLastUploadTime] = useState<Date>(new Date());
+  const [hash] = useState(makeHash(5));
+
 
   let path = window.location.pathname;
   if (path.endsWith("/")) {
@@ -49,7 +64,7 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
         <View columnStart="2" columnEnd="-1">
           <FileUploader
             acceptedFileTypes={["image/*", "video/*"]}
-            path={`public/${props.albumName}/`}
+            path={`public/${props.albumName}/${hash}`}
             maxFileCount={1000}
             isResumable
             useAccelerateEndpoint
