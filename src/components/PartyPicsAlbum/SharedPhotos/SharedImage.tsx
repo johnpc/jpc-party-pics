@@ -17,7 +17,7 @@ export const SharedImage = (props: {
       setUrl(url);
     };
     fetchUrl();
-  }, []);
+  }, [props.image.key]);
 
   const imageComponent =
     detectFileType(props.image.key) === "image" ? (
@@ -32,6 +32,7 @@ export const SharedImage = (props: {
         key={props.image.key}
         alt={props.image.key}
         onClick={() => props.handleOpenModal(props.image)}
+        loading="lazy"
       />
     ) : (
       <video
@@ -44,7 +45,7 @@ export const SharedImage = (props: {
         }}
         controls={true}
         key={props.image.key}
-        preload="auto"
+        preload="metadata"
         playsInline={true}
         autoPlay={true}
         loop={true}
@@ -64,7 +65,6 @@ export const SharedImage = (props: {
       textAlign={"center"}
       padding={tokens.space.xxxs}
     >
-      {" "}
       {url ? imageComponent : <Loader size="large" />}
     </Card>
   );

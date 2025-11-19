@@ -5,6 +5,7 @@ import { CopyLink } from "./CopyLink";
 import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
 import { useState } from "react";
 import { useUploadImage } from "../../hooks/useImages";
+import { compressMedia } from "../../helpers/compressMedia";
 
 const makeHash = (length: number): string => {
   let result = "";
@@ -64,6 +65,7 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
             isResumable
             useAccelerateEndpoint
             onUploadSuccess={onSuccess}
+            processFile={compressMedia}
           />
         </View>
       </Grid>
