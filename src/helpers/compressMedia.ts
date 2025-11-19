@@ -4,15 +4,24 @@ const MAX_SIZE_MB = 1.5;
 const MAX_WIDTH_PX = 1920;
 const QUALITY = 0.85;
 
-export const compressMedia = async (file: File): Promise<File> => {
+interface ProcessFileParams {
+  file: File;
+  key: string;
+}
+
+export const compressMedia = async (
+  params: ProcessFileParams,
+): Promise<ProcessFileParams> => {
+  const { file, key } = params;
+
   // Skip compression for videos
   if (file.type.startsWith("video/")) {
-    return file;
+    return params;
   }
 
   // Skip if already small enough
   if (file.size < MAX_SIZE_MB * 1024 * 1024) {
-    return file;
+    return params;
   }
 
   try {
@@ -28,9 +37,9 @@ export const compressMedia = async (file: File): Promise<File> => {
       `Compressed ${file.name}: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(compressed.size / 1024 / 1024).toFixed(2)}MB`,
     );
 
-    return compressed;
+    return { file: compressed, key };
   } catch (error) {
     console.warn("Compression failed, using original:", error);
-    return file;
+    return params;
   }
 };
