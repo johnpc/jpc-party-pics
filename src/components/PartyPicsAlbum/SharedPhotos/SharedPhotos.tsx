@@ -8,13 +8,18 @@ import {
   Text,
   useTheme,
 } from "@aws-amplify/ui-react";
-import { generateClient } from "aws-amplify/api";
 import { Schema } from "../../../../amplify/data/resource";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { custom } from "../../../../amplify_outputs.json";
-const client = generateClient<Schema>();
+import { getUrl } from "aws-amplify/storage";
+import { Modal } from "@mui/material";
+import { SharedImage } from "./SharedImage";
+import { ModalImage } from "./ModalImage";
+import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
+import { useDeleteImage, useImages } from "../../../hooks/useImages";
+
 const itemsPerPage = 24;
 
 function humanFileSize(bytes: number, si = false, dp = 1) {
@@ -41,119 +46,55 @@ function humanFileSize(bytes: number, si = false, dp = 1) {
   return bytes.toFixed(dp) + " " + units[u];
 }
 
-import { getUrl } from "aws-amplify/storage";
-import { Modal } from "@mui/material";
-import { SharedImage } from "./SharedImage";
-import { ModalImage } from "./ModalImage";
-import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
-
 const downloadFile = async (key: string) => {
   const url = await getUrl({
     path: key,
     options: {
-      // ensure object exists before getting url
       validateObjectExistence: true,
-      // url expiration time in seconds.
       expiresIn: 300,
-      // whether to use accelerate endpoint
       useAccelerateEndpoint: true,
     },
   });
   window.open(url.url, "_blank");
 };
 
-export const SharedPhotos = (props: {
-  lastUploadTime: Date;
-  albumName: string;
-}) => {
+export const SharedPhotos = (props: { albumName: string }) => {
   const { tokens } = useTheme();
-  const [images, setImages] = useState<Schema["Image"]["type"][]>([]);
-  const [loading, setLoading] = useState(true);
   const [downloadAllLoading, setDownloadAllLoading] = useState(false);
-  const [lastDeleteTime, setLastDeleteTime] = useState(new Date());
   const [openModalImage, setOpenModalImage] =
     useState<Schema["Image"]["type"]>();
-  useEffect(() => {
-    setLoading(true);
-    const fetchImages = async () => {
-      const response = await client.queries.getPartyPicsImages({
-        albumName: props.albumName,
-      });
-      const images = response.data?.images ?? [];
-      setImages(images);
-      setLoading(false);
-    };
-    fetchImages();
-  }, [lastDeleteTime, props.albumName, props.lastUploadTime]);
 
-  useEffect(() => {
-    const createListener = client.models.AlbumImageKey.onCreate().subscribe({
-      next: async (imageKey: Schema["AlbumImageKey"]["type"]) => {
-        if (imageKey.albumName === props.albumName) {
-          setImages([
-            {
-              size: 0,
-              date: new Date().toLocaleString(),
-              key: imageKey.imageKey,
-            },
-            ...images,
-          ]);
-        }
-      },
-      error: (error: Error) => {
-        console.error("Subscription error", error);
-      },
-    });
-    const deleteListener = client.models.AlbumImageKey.onDelete().subscribe({
-      next: async (imageKey: Schema["AlbumImageKey"]["type"]) => {
-        setImages(images.filter((i) => i.key !== imageKey.imageKey));
-      },
-      error: (error: Error) => {
-        console.error("Subscription error", error);
-      },
-    });
-    return () => {
-      deleteListener.unsubscribe();
-      createListener.unsubscribe();
-    };
-  }, [images]);
+  const { data: images = [], isLoading } = useImages(props.albumName);
+  const deleteImage = useDeleteImage(props.albumName);
 
   const deleteFile = async (key: string) => {
     const confirmed = confirm(
-      `Are you sure? This action is destructive. The image can never be recovered.`,
+      `Are you sure? This action is destructive. The image can never be recovered.`
     );
     if (!confirmed) return;
 
-    await client.queries.deletePartyPic({ key });
-    await client.models.AlbumImageKey.delete({ imageKey: key });
-    setLastDeleteTime(new Date());
+    await deleteImage.mutateAsync(key);
     setOpenModalImage(undefined);
   };
 
   const downloadAll = async () => {
     const confirmed = confirm(
-      `Are you sure? This will download ${humanFileSize(images.reduce((acc, image) => acc + image.size, 0))}`,
+      `Are you sure? This will download ${humanFileSize(images.reduce((acc, image) => acc + image.size, 0))}`
     );
     if (!confirmed) return;
 
     setDownloadAllLoading(true);
-    // const zipFileResult = await client.queries.getPartyPicsZipFile({
-    //   albumName: props.albumName,
-    // });
     try {
       const zipFileResponse = await fetch(custom.zipFileEndpoint, {
         method: "POST",
         body: JSON.stringify({ albumName: props.albumName }),
       });
       const zipFileResult = await zipFileResponse.json();
-
-      console.log({ zipFileResult });
       await downloadFile(zipFileResult.key ?? zipFileResult.data!.key);
     } catch (error) {
       alert(`Error downloading zip file: ${(error as Error).message}`);
       console.error(error);
     }
-
     setDownloadAllLoading(false);
   };
 
@@ -176,10 +117,6 @@ export const SharedPhotos = (props: {
     const forwardIndex = index === images.length - 1 ? 0 : index + 1;
     handleOpenModal(images[forwardIndex]);
   };
-
-  // images.sort(
-  //   (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  // );
 
   return (
     <>
@@ -253,7 +190,7 @@ export const SharedPhotos = (props: {
         isPaginated={images.length > itemsPerPage}
         itemsPerPage={itemsPerPage}
         searchNoResultsFound={
-          loading ? (
+          isLoading ? (
             <Loader variation="linear" />
           ) : (
             <Heading level={4} textAlign="center">

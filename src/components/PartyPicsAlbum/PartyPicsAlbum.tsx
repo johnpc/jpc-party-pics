@@ -1,13 +1,10 @@
 import { FileUploader } from "@aws-amplify/ui-react-storage";
-
 import QRCode from "react-qr-code";
 import { Divider, Grid, Text, useTheme, View } from "@aws-amplify/ui-react";
 import { CopyLink } from "./CopyLink";
 import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
 import { useState } from "react";
-import { generateClient } from "aws-amplify/api";
-import { Schema } from "../../../amplify/data/resource";
-const client = generateClient<Schema>();
+import { useUploadImage } from "../../hooks/useImages";
 
 const makeHash = (length: number): string => {
   let result = "";
@@ -23,11 +20,11 @@ const makeHash = (length: number): string => {
 };
 
 const qrSize = 256;
+
 export const PartyPicsAlbum = (props: { albumName: string }) => {
   const { tokens } = useTheme();
-  const [lastUploadTime, setLastUploadTime] = useState<Date>(new Date());
   const [hash] = useState(makeHash(5));
-
+  const uploadImage = useUploadImage(props.albumName);
 
   let path = window.location.pathname;
   if (path.endsWith("/")) {
@@ -35,11 +32,9 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
   }
 
   const onSuccess = async (event: { key?: string | undefined }) => {
-    setLastUploadTime(new Date());
-    await client.models.AlbumImageKey.create({
-      imageKey: event.key!,
-      albumName: props.albumName,
-    });
+    if (event.key) {
+      await uploadImage.mutateAsync(event.key);
+    }
   };
 
   return (
@@ -77,10 +72,7 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
         marginTop={tokens.space.medium}
         marginBottom={tokens.space.medium}
       />
-      <SharedPhotos
-        lastUploadTime={lastUploadTime}
-        albumName={props.albumName}
-      />
+      <SharedPhotos albumName={props.albumName} />
     </>
   );
 };

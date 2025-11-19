@@ -1,6 +1,4 @@
-import { generateClient } from "aws-amplify/api";
-import { Schema } from "../../amplify/data/resource";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 import {
   Button,
   Card,
@@ -12,25 +10,18 @@ import {
   Text,
   useTheme,
 } from "@aws-amplify/ui-react";
-const client = generateClient<Schema>();
+import { useAlbums, useCreateAlbum } from "../hooks/useAlbums";
+
 export const CreateAlbum = () => {
   const { tokens } = useTheme();
   const [createdAlbumName, setCreatedAlbumName] = useState("");
   const [desiredPartyName, setDesiredPartyName] = useState("");
   const [isValidPartyName, setIsValidPartyName] = useState(false);
-  const [existingAlbums, setExistingAlbums] = useState<
-    Schema["Albums"]["type"][]
-  >([]);
-  useEffect(() => {
-    const setup = async () => {
-      const response = await client.models.Albums.list();
-      const albums = response.data ?? [];
-      setExistingAlbums(albums);
-    };
-    setup();
-  }, []);
 
-  const checkIsValidPartyName = async (partyName: string): Promise<boolean> => {
+  const { data: existingAlbums = [] } = useAlbums();
+  const createAlbum = useCreateAlbum();
+
+  const checkIsValidPartyName = (partyName: string): boolean => {
     return (
       !partyName.includes(" ") &&
       !existingAlbums
@@ -41,28 +32,22 @@ export const CreateAlbum = () => {
 
   const onDesiredPartyNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDesiredPartyName(e.target.value);
-    if (!checkIsValidPartyName(e.target.value)) {
-      setIsValidPartyName(false);
-      return;
-    }
-    setIsValidPartyName(true);
+    setIsValidPartyName(checkIsValidPartyName(e.target.value));
   };
 
   const onCreatePartyAlbum = async () => {
-    if (!(await checkIsValidPartyName(desiredPartyName))) {
+    if (!checkIsValidPartyName(desiredPartyName)) {
       alert("Desired party name is not valid");
       return;
     }
 
-    const createdPartyAlbum = await client.models.Albums.create({
-      albumName: desiredPartyName,
-    });
-    if (createdPartyAlbum.errors) {
-      console.error({ error: createdPartyAlbum.errors });
+    try {
+      await createAlbum.mutateAsync(desiredPartyName);
+      setCreatedAlbumName(desiredPartyName);
+      window.location.href = `/${desiredPartyName}`;
+    } catch {
       alert("Failed to create album. Try again.");
     }
-    setCreatedAlbumName(desiredPartyName);
-    window.location.href = `/${desiredPartyName}`;
   };
 
   return (
