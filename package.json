@@ -11,6 +11,7 @@
     "sandbox": "ampx sandbox --profile personal --once",
     "prod-config": "ampx generate outputs --app-id d131sf2ylw1gxp --branch main --profile personal",
     "prepare": "husky install",
+    "postinstall": "npm rebuild @parcel/watcher --build-from-source || true",
     "spell-check": "cspell \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
