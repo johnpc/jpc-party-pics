@@ -1,16 +1,19 @@
-import { Divider, Heading, useTheme } from "@aws-amplify/ui-react";
-import { SharedPhotos } from "./PartyPicsAlbum/SharedPhotos/SharedPhotos";
+import { Heading, useTheme } from "@aws-amplify/ui-react";
+import { KioskSharedPhotos } from "./PartyPicsAlbum/SharedPhotos/KioskSharedPhotos";
 
 export const Kiosk = (props: { albumName: string }) => {
   const { tokens } = useTheme();
 
   return (
-    <>
-      <Heading level={2} textAlign="center" marginBottom={tokens.space.medium}>
+    <div style={{ 
+      maxWidth: "100%", 
+      padding: tokens.space.small,
+      margin: 0 
+    }}>
+      <Heading level={1} textAlign="center" marginBottom={tokens.space.small}>
         {props.albumName}
       </Heading>
-      <Divider marginBottom={tokens.space.medium} />
-      <SharedPhotos albumName={props.albumName} />
-    </>
+      <KioskSharedPhotos albumName={props.albumName} />
+    </div>
   );
 };
