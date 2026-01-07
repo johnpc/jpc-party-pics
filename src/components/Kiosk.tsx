@@ -1,4 +1,4 @@
-import { Heading, useTheme } from "@aws-amplify/ui-react";
+import { useTheme } from "@aws-amplify/ui-react";
 import { KioskSharedPhotos } from "./PartyPicsAlbum/SharedPhotos/KioskSharedPhotos";
 
 export const Kiosk = (props: { albumName: string }) => {
@@ -10,9 +10,6 @@ export const Kiosk = (props: { albumName: string }) => {
       padding: tokens.space.small.value,
       margin: 0 
     }}>
-      <Heading level={1} textAlign="center" marginBottom={tokens.space.small}>
-        {props.albumName}
-      </Heading>
       <KioskSharedPhotos albumName={props.albumName} />
     </div>
   );
