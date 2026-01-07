@@ -12,6 +12,7 @@ export const CameraButton = ({ albumName }: { albumName: string }) => {
       fontSize={tokens.fontSizes.large.value}
       padding={tokens.space.large.value}
       width="100%"
+      textAlign="center"
     >
       📸 Use In-App Camera
     </Button>

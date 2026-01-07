@@ -73,6 +73,7 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
         </View>
       </Grid>
       <CopyLink link={window.location.href} />
+      <div style={{ marginTop: tokens.space.small.value }} />
       <CopyLink link={`${window.location.origin}/${props.albumName}/kiosk`} label="Copy Kiosk Link" />
       <Divider
         marginTop={tokens.space.medium}
