@@ -169,7 +169,7 @@ export const CameraCapture = ({ albumName }: { albumName: string }) => {
                 width: "100%",
                 maxHeight: "400px",
                 backgroundColor: "#000",
-                borderRadius: tokens.radii.medium,
+                borderRadius: tokens.radii.medium.value,
               }}
             />
             <canvas ref={canvasRef} style={{ display: "none" }} />

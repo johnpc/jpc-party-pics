@@ -26,7 +26,7 @@ export const KioskSharedPhotos = (props: { albumName: string }) => {
     <div style={{
       display: "grid",
       gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-      gap: tokens.space.xs,
+      gap: tokens.space.xs.value,
       width: "100%",
     }}>
       {images.map((image) => (

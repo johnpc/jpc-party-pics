@@ -8,12 +8,10 @@ export const CameraButton = ({ albumName }: { albumName: string }) => {
       onClick={() => window.location.href = `/${albumName}/camera`}
       variation="primary"
       size="large"
-      style={{
-        width: "100%",
-        marginBottom: tokens.space.medium,
-        fontSize: tokens.fontSizes.large,
-        padding: tokens.space.large,
-      }}
+      marginBottom={tokens.space.medium.value}
+      fontSize={tokens.fontSizes.large.value}
+      padding={tokens.space.large.value}
+      width="100%"
     >
       📸 Use In-App Camera
     </Button>
