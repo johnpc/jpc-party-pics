@@ -1,9 +1,8 @@
 import { Button, useTheme } from "@aws-amplify/ui-react";
 import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { isMobileScreenSize } from "../../helpers/isMobileScreenSize";
 
-export const CopyLink = (props: { link: string; label?: string }) => {
+export const CopyLink = (props: { link: string; label?: string; variation?: "primary" | "link" }) => {
   const { tokens } = useTheme();
   const [copied, setCopied] = useState(false);
   const fileUrl = props.link;
@@ -18,8 +17,8 @@ export const CopyLink = (props: { link: string; label?: string }) => {
       <Button
         marginBottom={tokens.space.medium}
         marginTop={tokens.space.medium}
-        isFullWidth={isMobileScreenSize}
         colorTheme={copied ? "success" : undefined}
+        variation={props.variation}
       >
         {copied ? "✅" : props.label || "Copy Album Link"}
       </Button>

@@ -1,6 +1,6 @@
 import { FileUploader } from "@aws-amplify/ui-react-storage";
 import QRCode from "react-qr-code";
-import { Divider, Grid, Text, useTheme, View } from "@aws-amplify/ui-react";
+import { Divider, Flex, Grid, Text, useTheme, View } from "@aws-amplify/ui-react";
 import { CopyLink } from "./CopyLink";
 import { CameraButton } from "./CameraButton";
 import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
@@ -72,9 +72,10 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
           />
         </View>
       </Grid>
-      <CopyLink link={window.location.href} />
-      <div style={{ marginTop: tokens.space.small.value }} />
-      <CopyLink link={`${window.location.origin}/${props.albumName}/kiosk`} label="Copy Kiosk Link" />
+      <Flex gap={tokens.space.small} wrap="wrap" justifyContent="center">
+        <CopyLink link={window.location.href} />
+        <CopyLink link={`${window.location.origin}/${props.albumName}/kiosk`} label="Copy Kiosk Link" variation="link" />
+      </Flex>
       <Divider
         marginTop={tokens.space.medium}
         marginBottom={tokens.space.medium}
