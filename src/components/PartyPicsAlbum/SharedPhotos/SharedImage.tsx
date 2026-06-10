@@ -39,7 +39,7 @@ export const SharedImage = (props: {
         onClick={() => props.handleOpenModal(props.image)}
         style={{
           borderRadius: tokens.radii.large.value,
-          height: "100%",
+          width: "100%",
           maxHeight: "30vh",
           objectFit: "cover",
         }}
@@ -64,6 +64,7 @@ export const SharedImage = (props: {
       width={isMobileScreenSize ? "45%" : undefined}
       textAlign={"center"}
       padding={tokens.space.xxxs}
+      overflow="hidden"
     >
       {url ? imageComponent : <Loader size="large" />}
     </Card>
