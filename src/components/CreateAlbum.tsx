@@ -1,4 +1,3 @@
-import { ChangeEvent, useState } from "react";
 import {
   Button,
   Card,
@@ -10,45 +9,11 @@ import {
   Text,
   useTheme,
 } from "@aws-amplify/ui-react";
-import { useAlbums, useCreateAlbum } from "../hooks/useAlbums";
+import { useCreateAlbumForm } from "../hooks/useCreateAlbumForm";
 
 export const CreateAlbum = () => {
   const { tokens } = useTheme();
-  const [createdAlbumName, setCreatedAlbumName] = useState("");
-  const [desiredPartyName, setDesiredPartyName] = useState("");
-  const [isValidPartyName, setIsValidPartyName] = useState(false);
-
-  const { data: existingAlbums = [] } = useAlbums();
-  const createAlbum = useCreateAlbum();
-
-  const checkIsValidPartyName = (partyName: string): boolean => {
-    return (
-      !partyName.includes(" ") &&
-      !existingAlbums
-        .map((e) => e.albumName.toLowerCase())
-        .includes(partyName.toLowerCase())
-    );
-  };
-
-  const onDesiredPartyNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setDesiredPartyName(e.target.value);
-    setIsValidPartyName(checkIsValidPartyName(e.target.value));
-  };
-
-  const onCreatePartyAlbum = async () => {
-    if (!checkIsValidPartyName(desiredPartyName)) {
-      alert("Desired party name is not valid");
-      return;
-    }
-
-    try {
-      await createAlbum.mutateAsync(desiredPartyName);
-      setCreatedAlbumName(desiredPartyName);
-      window.location.href = `/${desiredPartyName}`;
-    } catch {
-      alert("Failed to create album. Try again.");
-    }
-  };
+  const form = useCreateAlbumForm();
 
   return (
     <>
@@ -72,29 +37,30 @@ export const CreateAlbum = () => {
           templateColumns={{ base: "1fr" }}
           templateRows={{ base: "1fr 1fr" }}
         >
-          {createdAlbumName ? (
-            <>
-              <Link
-                padding={"10px"}
-                width={"100%"}
-                margin={"auto"}
-                textAlign={"center"}
-                href={`/${createdAlbumName}`}
-                borderStyle={"dotted"}
-              >
-                {createdAlbumName}
-              </Link>
-            </>
+          {form.createdAlbumName ? (
+            <Link
+              padding={"10px"}
+              width={"100%"}
+              margin={"auto"}
+              textAlign={"center"}
+              href={`/${form.createdAlbumName}`}
+              borderStyle={"dotted"}
+            >
+              {form.createdAlbumName}
+            </Link>
           ) : (
             <>
               <Input
                 placeholder="my-party"
                 size="large"
-                value={desiredPartyName}
-                onChange={onDesiredPartyNameChange}
-                hasError={!isValidPartyName}
+                value={form.desiredPartyName}
+                onChange={form.onDesiredPartyNameChange}
+                hasError={!form.isValidPartyName}
               />
-              <Button disabled={!isValidPartyName} onClick={onCreatePartyAlbum}>
+              <Button
+                disabled={!form.isValidPartyName}
+                onClick={form.onCreatePartyAlbum}
+              >
                 Create Party Album
               </Button>
             </>

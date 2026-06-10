@@ -1,0 +1,189 @@
+{
+  "total": {
+    "lines": { "total": 356, "covered": 349, "skipped": 0, "pct": 98.03 },
+    "statements": { "total": 382, "covered": 372, "skipped": 0, "pct": 97.38 },
+    "functions": { "total": 105, "covered": 100, "skipped": 0, "pct": 95.23 },
+    "branches": { "total": 123, "covered": 110, "skipped": 0, "pct": 89.43 },
+    "branchesTrue": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/App.tsx": {
+    "lines": { "total": 7, "covered": 7, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 7, "covered": 7, "skipped": 0, "pct": 100 },
+    "branches": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/CreateAlbum.tsx": {
+    "lines": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "branches": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/Header.tsx": {
+    "lines": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 },
+    "functions": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "statements": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/Kiosk.tsx": {
+    "lines": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/Camera/Camera.tsx": {
+    "lines": { "total": 8, "covered": 8, "skipped": 0, "pct": 100 },
+    "functions": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "statements": { "total": 9, "covered": 9, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/Camera/CameraStatusAlert.tsx": {
+    "lines": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 },
+    "branches": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/Camera/CaptureControls.tsx": {
+    "lines": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "branches": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/Camera/ModeToggle.tsx": {
+    "lines": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "functions": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "statements": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "branches": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/CameraButton.tsx": {
+    "lines": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "functions": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 },
+    "statements": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/CameraCapture.tsx": {
+    "lines": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 },
+    "branches": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/CopyLink.tsx": {
+    "lines": { "total": 7, "covered": 7, "skipped": 0, "pct": 100 },
+    "functions": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "statements": { "total": 8, "covered": 8, "skipped": 0, "pct": 100 },
+    "branches": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/PartyPicsAlbum.tsx": {
+    "lines": { "total": 21, "covered": 19, "skipped": 0, "pct": 90.47 },
+    "functions": { "total": 3, "covered": 2, "skipped": 0, "pct": 66.66 },
+    "statements": { "total": 21, "covered": 19, "skipped": 0, "pct": 90.47 },
+    "branches": { "total": 4, "covered": 1, "skipped": 0, "pct": 25 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/SharedPhotos/KioskImage.tsx": {
+    "lines": { "total": 11, "covered": 11, "skipped": 0, "pct": 100 },
+    "functions": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "statements": { "total": 11, "covered": 11, "skipped": 0, "pct": 100 },
+    "branches": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/SharedPhotos/KioskSharedPhotos.tsx": {
+    "lines": { "total": 9, "covered": 9, "skipped": 0, "pct": 100 },
+    "functions": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 },
+    "statements": { "total": 9, "covered": 9, "skipped": 0, "pct": 100 },
+    "branches": { "total": 5, "covered": 4, "skipped": 0, "pct": 80 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/SharedPhotos/ModalImage.tsx": {
+    "lines": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 },
+    "functions": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "statements": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 },
+    "branches": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/SharedPhotos/PhotoModal.tsx": {
+    "lines": { "total": 12, "covered": 12, "skipped": 0, "pct": 100 },
+    "functions": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 },
+    "statements": { "total": 15, "covered": 15, "skipped": 0, "pct": 100 },
+    "branches": { "total": 8, "covered": 7, "skipped": 0, "pct": 87.5 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/SharedPhotos/SharedImage.tsx": {
+    "lines": { "total": 12, "covered": 11, "skipped": 0, "pct": 91.66 },
+    "functions": { "total": 5, "covered": 4, "skipped": 0, "pct": 80 },
+    "statements": { "total": 12, "covered": 11, "skipped": 0, "pct": 91.66 },
+    "branches": { "total": 6, "covered": 4, "skipped": 0, "pct": 66.66 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/components/PartyPicsAlbum/SharedPhotos/SharedPhotos.tsx": {
+    "lines": { "total": 7, "covered": 7, "skipped": 0, "pct": 100 },
+    "functions": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "statements": { "total": 7, "covered": 7, "skipped": 0, "pct": 100 },
+    "branches": { "total": 4, "covered": 3, "skipped": 0, "pct": 75 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/helpers/compressMedia.ts": {
+    "lines": { "total": 15, "covered": 15, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 15, "covered": 15, "skipped": 0, "pct": 100 },
+    "branches": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/helpers/detectFileType.ts": {
+    "lines": { "total": 8, "covered": 8, "skipped": 0, "pct": 100 },
+    "functions": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "statements": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 },
+    "branches": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/helpers/getAccelerateUrl.ts": {
+    "lines": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/helpers/humanFileSize.ts": {
+    "lines": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 },
+    "branches": { "total": 10, "covered": 10, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/helpers/isMobileScreenSize.ts": {
+    "lines": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "functions": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 },
+    "statements": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/helpers/sleep.ts": {
+    "lines": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 },
+    "functions": { "total": 2, "covered": 2, "skipped": 0, "pct": 100 },
+    "statements": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/hooks/useAlbums.ts": {
+    "lines": { "total": 12, "covered": 12, "skipped": 0, "pct": 100 },
+    "functions": { "total": 5, "covered": 5, "skipped": 0, "pct": 100 },
+    "statements": { "total": 13, "covered": 13, "skipped": 0, "pct": 100 },
+    "branches": { "total": 4, "covered": 4, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/hooks/useCamera.ts": {
+    "lines": { "total": 75, "covered": 71, "skipped": 0, "pct": 94.66 },
+    "functions": { "total": 13, "covered": 11, "skipped": 0, "pct": 84.61 },
+    "statements": { "total": 82, "covered": 76, "skipped": 0, "pct": 92.68 },
+    "branches": { "total": 12, "covered": 10, "skipped": 0, "pct": 83.33 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/hooks/useCreateAlbumForm.ts": {
+    "lines": { "total": 21, "covered": 21, "skipped": 0, "pct": 100 },
+    "functions": { "total": 5, "covered": 5, "skipped": 0, "pct": 100 },
+    "statements": { "total": 21, "covered": 21, "skipped": 0, "pct": 100 },
+    "branches": { "total": 5, "covered": 4, "skipped": 0, "pct": 80 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/hooks/useImages.ts": {
+    "lines": { "total": 32, "covered": 32, "skipped": 0, "pct": 100 },
+    "functions": { "total": 16, "covered": 15, "skipped": 0, "pct": 93.75 },
+    "statements": { "total": 33, "covered": 32, "skipped": 0, "pct": 96.96 },
+    "branches": { "total": 6, "covered": 6, "skipped": 0, "pct": 100 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/hooks/usePhotoGallery.ts": {
+    "lines": { "total": 35, "covered": 35, "skipped": 0, "pct": 100 },
+    "functions": { "total": 11, "covered": 11, "skipped": 0, "pct": 100 },
+    "statements": { "total": 42, "covered": 42, "skipped": 0, "pct": 100 },
+    "branches": { "total": 11, "covered": 9, "skipped": 0, "pct": 81.81 }
+  },
+  "/Users/johnpc/repo/jpc-party-pics/src/providers/QueryProvider.tsx": {
+    "lines": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "functions": { "total": 1, "covered": 1, "skipped": 0, "pct": 100 },
+    "statements": { "total": 3, "covered": 3, "skipped": 0, "pct": 100 },
+    "branches": { "total": 0, "covered": 0, "skipped": 0, "pct": 100 }
+  }
+}
