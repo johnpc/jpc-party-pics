@@ -8,6 +8,7 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     setupFiles: ["./src/test/setup.ts"],
+    exclude: ["node_modules", ".features-gen", "e2e"],
     coverage: {
       provider: "istanbul",
       reporter: ["text", "json", "html", "json-summary"],

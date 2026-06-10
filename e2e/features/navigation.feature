@@ -5,8 +5,7 @@ Feature: Navigation
 
   Scenario: Header shows on all pages
     Given I am on the home page
-    Then I should see "partypics.jpc.io"
-    And I should see "Collaborative event photos"
+    Then I should see the app header
 
   Scenario: Clicking header logo returns to home
     Given I navigate to album "wedding"

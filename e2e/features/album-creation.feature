@@ -20,9 +20,9 @@ Feature: Album Creation
     Then the create button should be disabled
 
   Scenario: Cannot create album with duplicate name
-    Given an album named "existing-party" already exists
-    And I am on the home page
-    When I type "existing-party" in the album name input
+    Given I am on the home page
+    And I wait for albums to load
+    When I type "Demo" in the album name input
     Then the create button should be disabled
 
   Scenario: Can create album with valid name

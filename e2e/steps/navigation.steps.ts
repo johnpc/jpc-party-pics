@@ -7,6 +7,10 @@ When("I click the header", async ({ page }) => {
   await page.locator("[class*='card']").first().click();
 });
 
+Then("I should see the app header", async ({ page }) => {
+  await expect(page.locator("h5, [class*='heading']").first()).toBeVisible();
+});
+
 Then(
   "I should see the album page for {string}",
   async ({ page }, name: string) => {

@@ -7,8 +7,12 @@ Given("I am on the home page", async ({ page }) => {
   await page.goto("/");
 });
 
-Given("an album named {string} already exists", async () => {
-  // Album existence is mocked via API state; for e2e this is a precondition
+Given("I wait for albums to load", async ({ page }) => {
+  await page.waitForResponse(
+    (response) =>
+      response.url().includes("appsync") && response.status() === 200,
+    { timeout: 10000 },
+  );
 });
 
 When(
@@ -36,7 +40,7 @@ Then(
 Then("the create button should be disabled", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: /Create Party Album/ }),
-  ).toBeDisabled();
+  ).toBeDisabled({ timeout: 10000 });
 });
 
 Then("the create button should be enabled", async ({ page }) => {

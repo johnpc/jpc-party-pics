@@ -33,3 +33,4 @@ amplifyconfiguration*
 coverage
 playwright-report
 test-results
+.features-gen

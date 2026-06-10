@@ -42,20 +42,17 @@ Feature: Photo Gallery
 
   Scenario: Delete photo with confirmation
     Given the photo modal is open
-    When I click the delete button
-    And I confirm the deletion
+    When I confirm and delete the photo
     Then the photo should be removed from the album
 
   Scenario: Cancel delete does not remove photo
     Given the photo modal is open
-    When I click the delete button
-    And I cancel the deletion
+    When I dismiss and click delete
     Then the photo should still be in the album
 
   Scenario: Download all as zip
     Given I navigate to an album with photos
-    When I click "Download All"
-    And I confirm the download
+    When I confirm and click download all
     Then a zip file should begin downloading
 
   Scenario: Paginated gallery for many photos

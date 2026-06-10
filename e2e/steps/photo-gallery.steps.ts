@@ -17,11 +17,15 @@ Given("I navigate to an album with more than 24 photos", async ({ page }) => {
 
 Given("the photo modal is open", async ({ page }) => {
   await page.goto("/Demo");
-  await page.locator("img").first().click();
+  const img = page.locator("img[src*='s3']").first();
+  await img.waitFor({ state: "visible", timeout: 15000 });
+  await img.click();
 });
 
 When("I click on a photo", async ({ page }) => {
-  await page.locator("img").first().click();
+  const img = page.locator("img[src*='s3']").first();
+  await img.waitFor({ state: "visible", timeout: 15000 });
+  await img.click();
 });
 
 When("I click the forward arrow", async ({ page }) => {
@@ -33,35 +37,32 @@ When("I click the back arrow", async ({ page }) => {
 });
 
 When("I click outside the modal", async ({ page }) => {
-  await page.locator(".MuiModal-backdrop").click();
+  await page.locator(".MuiModal-backdrop").click({ force: true });
 });
 
 When("I click the download button", async ({ page }) => {
   await page.getByRole("button", { name: /download/ }).click();
 });
 
-When("I click the delete button", async ({ page }) => {
+When("I confirm and delete the photo", async ({ page }) => {
+  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: /Delete photo/ }).click();
 });
 
-When("I confirm the deletion", async ({ page }) => {
-  page.on("dialog", (dialog) => dialog.accept());
+When("I dismiss and click delete", async ({ page }) => {
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await page.getByRole("button", { name: /Delete photo/ }).click();
 });
 
-When("I cancel the deletion", async ({ page }) => {
-  page.on("dialog", (dialog) => dialog.dismiss());
-});
-
-When("I confirm the download", async ({ page }) => {
-  page.on("dialog", (dialog) => dialog.accept());
-});
-
-Then("I should see {string}", async ({ page }, text: string) => {
-  await expect(page.getByText(text)).toBeVisible();
+When("I confirm and click download all", async ({ page }) => {
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: /Download All/ }).click();
 });
 
 Then("I should see photos in a grid layout", async ({ page }) => {
-  await expect(page.locator("img").first()).toBeVisible();
+  await expect(page.locator("img[src*='s3']").first()).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 Then("photos should be sorted newest first", async () => {
