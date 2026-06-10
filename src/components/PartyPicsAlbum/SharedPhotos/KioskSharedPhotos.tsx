@@ -1,8 +1,4 @@
-import {
-  Heading,
-  Loader,
-  useTheme,
-} from "@aws-amplify/ui-react";
+import { Heading, Loader, useTheme } from "@aws-amplify/ui-react";
 import { KioskImage } from "./KioskImage";
 import { useImages } from "../../../hooks/useImages";
 
@@ -23,17 +19,16 @@ export const KioskSharedPhotos = (props: { albumName: string }) => {
   }
 
   return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-      gap: tokens.space.xs.value,
-      width: "100%",
-    }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+        gap: tokens.space.xs.value,
+        width: "100%",
+      }}
+    >
       {images.map((image) => (
-        <KioskImage
-          image={image}
-          key={image.key}
-        />
+        <KioskImage image={image} key={image.key} />
       ))}
     </div>
   );

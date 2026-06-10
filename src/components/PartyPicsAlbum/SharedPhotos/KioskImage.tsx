@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
 import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
 
-export const KioskImage = (props: {
-  image: Schema["Image"]["type"];
-}) => {
+export const KioskImage = (props: { image: Schema["Image"]["type"] }) => {
   const { tokens } = useTheme();
   const [url, setUrl] = useState<URL>();
   useEffect(() => {
