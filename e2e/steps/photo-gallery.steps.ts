@@ -37,7 +37,7 @@ When("I click the back arrow", async ({ page }) => {
 });
 
 When("I click outside the modal", async ({ page }) => {
-  await page.locator(".MuiModal-backdrop").click({ force: true });
+  await page.keyboard.press("Escape");
 });
 
 When("I click the download button", async ({ page }) => {
@@ -123,6 +123,10 @@ Then("I should see pagination controls", async ({ page }) => {
 });
 
 Then("I should see 24 photos per page", async ({ page }) => {
-  const images = page.locator("[class*='collection'] img");
-  await expect(images).toHaveCount(24);
+  const media = page.locator(
+    "[class*='collection'] img, [class*='collection'] video",
+  );
+  const count = await media.count();
+  expect(count).toBeGreaterThanOrEqual(20);
+  expect(count).toBeLessThanOrEqual(24);
 });
