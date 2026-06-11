@@ -36,12 +36,28 @@ export function HeroUploadArea(props: HeroUploadAreaProps) {
       <Text color="white" fontWeight="bold" fontSize="large">
         Add your photos &amp; videos
       </Text>
+      <input
+        ref={fileInputRef}
+        id="hero-file-input"
+        type="file"
+        accept="image/*,video/*"
+        multiple
+        onChange={handleFileChange}
+        style={{
+          position: "absolute",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+          clip: "rect(0,0,0,0)",
+        }}
+      />
       <Flex
         justifyContent="center"
         gap={tokens.space.medium}
         marginTop={tokens.space.medium}
       >
         <label
+          htmlFor="hero-file-input"
           style={{
             display: "inline-block",
             cursor: "pointer",
@@ -54,14 +70,6 @@ export function HeroUploadArea(props: HeroUploadAreaProps) {
           }}
         >
           📁 Choose Files
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,video/*"
-            multiple
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
         </label>
         <Button
           size={btnSize}
