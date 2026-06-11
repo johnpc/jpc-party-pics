@@ -147,19 +147,20 @@ describe("useCamera", () => {
     const mockStart = vi.fn();
     const mockRecorderStop = vi.fn();
 
-    vi.stubGlobal(
-      "MediaRecorder",
-      class {
-        ondataavailable: ((e: { data: Blob }) => void) | null = null;
-        onstop: (() => void) | null = null;
-        start() {
-          mockStart();
-        }
-        stop() {
-          mockRecorderStop();
-        }
-      },
-    );
+    const MockMediaRecorder = class {
+      ondataavailable: ((e: { data: Blob }) => void) | null = null;
+      onstop: (() => void) | null = null;
+      start() {
+        mockStart();
+      }
+      stop() {
+        mockRecorderStop();
+      }
+      static isTypeSupported() {
+        return false;
+      }
+    };
+    vi.stubGlobal("MediaRecorder", MockMediaRecorder);
 
     const { result } = renderHook(() => useCamera("wedding"), {
       wrapper: createWrapper(),
@@ -297,22 +298,23 @@ describe("useCamera", () => {
     let capturedOnStop: (() => void) | null = null;
     let capturedOnData: ((e: { data: Blob }) => void) | null = null;
 
-    vi.stubGlobal(
-      "MediaRecorder",
-      class {
-        set ondataavailable(fn: ((e: { data: Blob }) => void) | null) {
-          capturedOnData = fn;
-        }
-        set onstop(fn: (() => void) | null) {
-          capturedOnStop = fn;
-        }
-        start() {}
-        stop() {
-          if (capturedOnData) capturedOnData({ data: new Blob(["video"]) });
-          if (capturedOnStop) capturedOnStop();
-        }
-      },
-    );
+    const MockMediaRecorder = class {
+      set ondataavailable(fn: ((e: { data: Blob }) => void) | null) {
+        capturedOnData = fn;
+      }
+      set onstop(fn: (() => void) | null) {
+        capturedOnStop = fn;
+      }
+      start() {}
+      stop() {
+        if (capturedOnData) capturedOnData({ data: new Blob(["video"]) });
+        if (capturedOnStop) capturedOnStop();
+      }
+      static isTypeSupported() {
+        return false;
+      }
+    };
+    vi.stubGlobal("MediaRecorder", MockMediaRecorder);
 
     const { result } = renderHook(() => useCamera("wedding"), {
       wrapper: createWrapper(),

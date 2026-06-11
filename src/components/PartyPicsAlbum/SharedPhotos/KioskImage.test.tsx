@@ -25,6 +25,10 @@ vi.mock("../../../helpers/getAccelerateUrl", () => ({
     .mockResolvedValue(new URL("https://cdn.example.com/photo.jpg")),
 }));
 
+vi.mock("../../../helpers/videoSupport", () => ({
+  canPlayVideoFile: () => true,
+}));
+
 describe("KioskImage", () => {
   it("shows loader initially", () => {
     renderWithProviders(

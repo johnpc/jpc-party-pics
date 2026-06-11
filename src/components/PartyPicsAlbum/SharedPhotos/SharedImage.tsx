@@ -3,7 +3,9 @@ import { Schema } from "../../../../amplify/data/resource";
 import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
 import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
+import { canPlayVideoFile } from "../../../helpers/videoSupport";
 import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
+import { VideoFallback } from "./VideoFallback";
 
 export const SharedImage = (props: {
   image: Schema["Image"]["type"];
@@ -19,40 +21,49 @@ export const SharedImage = (props: {
     fetchUrl();
   }, [props.image.key]);
 
-  const imageComponent =
-    detectFileType(props.image.key) === "image" ? (
-      <Image
-        src={url?.toString()}
-        style={{
-          borderRadius: tokens.radii.large.value,
-          height: "100%",
-          maxHeight: "30vh",
-          objectFit: "cover",
-        }}
-        key={props.image.key}
-        alt={props.image.key}
-        onClick={() => props.handleOpenModal(props.image)}
-        loading="lazy"
-      />
-    ) : (
-      <video
-        onClick={() => props.handleOpenModal(props.image)}
-        style={{
-          borderRadius: tokens.radii.large.value,
-          width: "100%",
-          maxHeight: "30vh",
-          objectFit: "cover",
-        }}
-        controls={true}
-        key={props.image.key}
-        preload="metadata"
-        playsInline={true}
-        autoPlay={true}
-        loop={true}
-        muted={true}
-        src={url?.toString()}
-      />
-    );
+  const fileType = detectFileType(props.image.key);
+  const isUnsupportedVideo =
+    fileType === "video" && !canPlayVideoFile(props.image.key);
+
+  const imageComponent = isUnsupportedVideo ? (
+    <VideoFallback
+      url={url?.toString()}
+      onClick={() => props.handleOpenModal(props.image)}
+      style={{ maxHeight: "30vh" }}
+    />
+  ) : fileType === "image" ? (
+    <Image
+      src={url?.toString()}
+      style={{
+        borderRadius: tokens.radii.large.value,
+        height: "100%",
+        maxHeight: "30vh",
+        objectFit: "cover",
+      }}
+      key={props.image.key}
+      alt={props.image.key}
+      onClick={() => props.handleOpenModal(props.image)}
+      loading="lazy"
+    />
+  ) : (
+    <video
+      onClick={() => props.handleOpenModal(props.image)}
+      style={{
+        borderRadius: tokens.radii.large.value,
+        width: "100%",
+        maxHeight: "30vh",
+        objectFit: "cover",
+      }}
+      controls={true}
+      key={props.image.key}
+      preload="metadata"
+      playsInline={true}
+      autoPlay={true}
+      loop={true}
+      muted={true}
+      src={url?.toString()}
+    />
+  );
 
   return (
     <Card

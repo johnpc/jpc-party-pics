@@ -37,6 +37,10 @@ vi.mock("../../../helpers/isMobileScreenSize", () => ({
   isMobileScreenSize: false,
 }));
 
+vi.mock("../../../helpers/videoSupport", () => ({
+  canPlayVideoFile: () => true,
+}));
+
 describe("SharedImage", () => {
   it("renders an image once URL resolves", async () => {
     renderWithProviders(

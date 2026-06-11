@@ -1,6 +1,15 @@
 {
   "version": "0.2",
   "language": "en",
-  "words": ["amplify", "hostable", "newparty", "partypics", "xxxs"],
+  "words": [
+    "amplify",
+    "hostable",
+    "matroska",
+    "msvideo",
+    "newparty",
+    "noextension",
+    "partypics",
+    "xxxs"
+  ],
   "ignorePaths": ["node_modules/**"]
 }

@@ -3,6 +3,8 @@ import { Schema } from "../../../../amplify/data/resource";
 import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
 import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
+import { canPlayVideoFile } from "../../../helpers/videoSupport";
+import { VideoFallback } from "./VideoFallback";
 
 export const KioskImage = (props: { image: Schema["Image"]["type"] }) => {
   const { tokens } = useTheme();
@@ -19,7 +21,15 @@ export const KioskImage = (props: { image: Schema["Image"]["type"] }) => {
     return <Loader size="small" />;
   }
 
-  return detectFileType(props.image.key) === "image" ? (
+  const fileType = detectFileType(props.image.key);
+  const isUnsupportedVideo =
+    fileType === "video" && !canPlayVideoFile(props.image.key);
+
+  if (isUnsupportedVideo) {
+    return <VideoFallback url={url.toString()} style={{ height: "auto" }} />;
+  }
+
+  return fileType === "image" ? (
     <Image
       src={url.toString()}
       style={{

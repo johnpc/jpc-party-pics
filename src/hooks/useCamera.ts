@@ -101,8 +101,13 @@ export function useCamera(albumName: string) {
   const startRecording = () => {
     if (!streamRef.current) return;
 
+    const mimeType = MediaRecorder.isTypeSupported("video/mp4")
+      ? "video/mp4"
+      : "video/webm";
+    const ext = mimeType === "video/mp4" ? "mp4" : "webm";
+
     chunksRef.current = [];
-    const mediaRecorder = new MediaRecorder(streamRef.current);
+    const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType });
     mediaRecorderRef.current = mediaRecorder;
 
     mediaRecorder.ondataavailable = (e) => {
@@ -110,12 +115,12 @@ export function useCamera(albumName: string) {
     };
 
     mediaRecorder.onstop = async () => {
-      const blob = new Blob(chunksRef.current, { type: "video/webm" });
+      const blob = new Blob(chunksRef.current, { type: mimeType });
       setStatus("uploading");
 
       try {
-        const file = new File([blob], `video-${Date.now()}.webm`, {
-          type: "video/webm",
+        const file = new File([blob], `video-${Date.now()}.${ext}`, {
+          type: mimeType,
         });
         const key = `public/${albumName}/${hash}/${file.name}`;
 
