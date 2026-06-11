@@ -13,6 +13,7 @@ vi.mock("@aws-amplify/ui-react", () => ({
   }) => <button onClick={onClick}>{children}</button>,
   Divider: () => <hr />,
   Flex: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Heading: ({ children }: { children: React.ReactNode }) => <h4>{children}</h4>,
   Text: ({ children }: { children: React.ReactNode }) => (
     <span>{children}</span>
   ),
@@ -24,10 +25,6 @@ vi.mock("@aws-amplify/ui-react", () => ({
       radii: { large: { value: "8px" } },
     },
   }),
-}));
-
-vi.mock("@aws-amplify/ui-react-storage", () => ({
-  FileUploader: () => <div data-testid="file-uploader">FileUploader</div>,
 }));
 
 vi.mock("react-qr-code", () => ({
@@ -46,12 +43,28 @@ vi.mock("./SharedPhotos/SharedPhotos", () => ({
   ),
 }));
 
-vi.mock("../../hooks/useImages", () => ({
-  useUploadImage: () => ({ mutateAsync: vi.fn() }),
+vi.mock("./UploadProgress", () => ({
+  UploadProgress: () => <div data-testid="upload-progress" />,
 }));
 
-vi.mock("../../helpers/compressMedia", () => ({
-  compressMedia: vi.fn(),
+vi.mock("./HeroUploadArea", () => ({
+  HeroUploadArea: ({ onTapCamera }: { onTapCamera: () => void }) => (
+    <div data-testid="hero-upload">
+      <button onClick={onTapCamera}>📸 Camera</button>
+    </div>
+  ),
+}));
+
+vi.mock("../../hooks/useUploadQueue", () => ({
+  useUploadQueue: () => ({
+    queue: [],
+    addFiles: vi.fn(),
+    retryFailed: vi.fn(),
+    activeCount: 0,
+    errorCount: 0,
+    completedCount: 0,
+    isUploading: false,
+  }),
 }));
 
 vi.mock("../../helpers/isMobileScreenSize", () => ({
@@ -70,23 +83,26 @@ describe("PartyPicsAlbum", () => {
     });
   });
 
+  it("renders album name as heading", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    expect(
+      screen.getByRole("heading", { name: "wedding" }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders share button at the top", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    expect(screen.getByText("🔗 Share")).toBeInTheDocument();
+  });
+
   it("renders shared photos", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
     expect(screen.getByTestId("shared-photos")).toHaveTextContent("wedding");
   });
 
-  it("renders action buttons (Camera, Upload, Share)", () => {
+  it("renders hero upload area", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
-    expect(screen.getByText("📸 Camera")).toBeInTheDocument();
-    expect(screen.getByText("📁 Upload")).toBeInTheDocument();
-    expect(screen.getByText("🔗 Share")).toBeInTheDocument();
-  });
-
-  it("shows file uploader when Upload is clicked", () => {
-    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
-    expect(screen.queryByTestId("file-uploader")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText("📁 Upload"));
-    expect(screen.getByTestId("file-uploader")).toBeInTheDocument();
+    expect(screen.getByTestId("hero-upload")).toBeInTheDocument();
   });
 
   it("shows QR code when Share is clicked", () => {
@@ -104,5 +120,10 @@ describe("PartyPicsAlbum", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
     const copyLinks = screen.getAllByTestId("copy-link");
     expect(copyLinks.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders upload progress component", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    expect(screen.getByTestId("upload-progress")).toBeInTheDocument();
   });
 });

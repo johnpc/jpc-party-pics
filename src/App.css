@@ -46,3 +46,9 @@
 .read-the-docs {
   color: #888;
 }
+
+.amplify-collection-pagination,
+.amplify-pagination,
+.amplify-flex {
+  justify-content: center;
+}
