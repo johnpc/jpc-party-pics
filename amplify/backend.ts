@@ -36,12 +36,13 @@ backend.addOutput({
   },
 });
 
-const transcodeLambda = backend.transcodeVideo.resources.lambda;
+const transcodeLambda = backend.transcodeVideo.resources
+  .lambda as lambda.Function;
 transcodeLambda.addLayers(
   lambda.LayerVersion.fromLayerVersionArn(
     transcodeLambda,
     "FfmpegLayer",
-    `arn:aws:lambda:us-west-2:${transcodeLambda.stack.account}:layer:ffmpeg:1`,
+    `arn:aws:lambda:${transcodeLambda.stack.region}:${transcodeLambda.stack.account}:layer:ffmpeg:1`,
   ),
 );
 

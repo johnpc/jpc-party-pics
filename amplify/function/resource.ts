@@ -22,4 +22,5 @@ export const transcodeVideo = defineFunction({
   entry: "./transcodeVideo.ts",
   timeoutSeconds: 300,
   memoryMB: 1024 * 2,
+  resourceGroupName: "storage",
 });
