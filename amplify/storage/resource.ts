@@ -3,6 +3,7 @@ import {
   deletePartyPic,
   getPartyPicsImages,
   getPartyPicsZipFile,
+  transcodeVideo,
 } from "../function/resource";
 
 export const storage = defineStorage({
@@ -14,6 +15,7 @@ export const storage = defineStorage({
       resource(getPartyPicsImages).to(["read", "write"]),
       resource(getPartyPicsZipFile).to(["read", "write"]),
       resource(deletePartyPic).to(["read", "write", "delete"]),
+      resource(transcodeVideo).to(["read", "write", "delete"]),
     ],
     "generated/*": [
       authenticated.to(["read", "write"]),

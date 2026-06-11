@@ -24,6 +24,10 @@ vi.mock("../../../helpers/getAccelerateUrl", () => ({
     .mockResolvedValue(new URL("https://cdn.example.com/photo.jpg")),
 }));
 
+vi.mock("../../../helpers/videoSupport", () => ({
+  canPlayVideoFile: () => true,
+}));
+
 describe("ModalImage", () => {
   it("renders image after URL loads", async () => {
     renderWithProviders(
