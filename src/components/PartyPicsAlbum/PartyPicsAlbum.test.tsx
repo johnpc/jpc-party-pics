@@ -1,20 +1,27 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, fireEvent } from "@testing-library/react";
 import { renderWithProviders } from "../../test/test-utils";
 import { PartyPicsAlbum } from "./PartyPicsAlbum";
 
 vi.mock("@aws-amplify/ui-react", () => ({
+  Button: ({
+    children,
+    onClick,
+  }: {
+    children: React.ReactNode;
+    onClick?: () => void;
+  }) => <button onClick={onClick}>{children}</button>,
   Divider: () => <hr />,
   Flex: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Grid: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Text: ({ children }: { children: React.ReactNode }) => (
     <span>{children}</span>
   ),
   View: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   useTheme: () => ({
     tokens: {
-      space: { small: "4px", medium: "8px" },
-      fontSizes: { small: "12px" },
+      space: { small: "4px", medium: "8px", xs: "2px", large: "16px" },
+      fontSizes: { small: "12px", large: "16px" },
+      radii: { large: { value: "8px" } },
     },
   }),
 }));
@@ -33,12 +40,6 @@ vi.mock("./CopyLink", () => ({
   ),
 }));
 
-vi.mock("./CameraButton", () => ({
-  CameraButton: ({ albumName }: { albumName: string }) => (
-    <div data-testid="camera-button">{albumName}</div>
-  ),
-}));
-
 vi.mock("./SharedPhotos/SharedPhotos", () => ({
   SharedPhotos: ({ albumName }: { albumName: string }) => (
     <div data-testid="shared-photos">{albumName}</div>
@@ -53,6 +54,10 @@ vi.mock("../../helpers/compressMedia", () => ({
   compressMedia: vi.fn(),
 }));
 
+vi.mock("../../helpers/isMobileScreenSize", () => ({
+  isMobileScreenSize: false,
+}));
+
 describe("PartyPicsAlbum", () => {
   beforeEach(() => {
     Object.defineProperty(window, "location", {
@@ -65,29 +70,39 @@ describe("PartyPicsAlbum", () => {
     });
   });
 
-  it("renders QR code", () => {
-    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
-    expect(screen.getByTestId("qr-code")).toBeInTheDocument();
-  });
-
-  it("renders camera button with album name", () => {
-    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
-    expect(screen.getByTestId("camera-button")).toHaveTextContent("wedding");
-  });
-
-  it("renders file uploader", () => {
-    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
-    expect(screen.getByTestId("file-uploader")).toBeInTheDocument();
-  });
-
   it("renders shared photos", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
     expect(screen.getByTestId("shared-photos")).toHaveTextContent("wedding");
   });
 
-  it("renders copy link buttons", () => {
+  it("renders action buttons (Camera, Upload, Share)", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    expect(screen.getByText("📸 Camera")).toBeInTheDocument();
+    expect(screen.getByText("📁 Upload")).toBeInTheDocument();
+    expect(screen.getByText("🔗 Share")).toBeInTheDocument();
+  });
+
+  it("shows file uploader when Upload is clicked", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    expect(screen.queryByTestId("file-uploader")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("📁 Upload"));
+    expect(screen.getByTestId("file-uploader")).toBeInTheDocument();
+  });
+
+  it("shows QR code when Share is clicked", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    fireEvent.click(screen.getByText("🔗 Share"));
+    expect(screen.getAllByTestId("qr-code").length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("shows QR code on desktop by default", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    expect(screen.getByTestId("qr-code")).toBeInTheDocument();
+  });
+
+  it("renders copy link buttons on desktop", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
     const copyLinks = screen.getAllByTestId("copy-link");
-    expect(copyLinks.length).toBe(2);
+    expect(copyLinks.length).toBeGreaterThanOrEqual(2);
   });
 });

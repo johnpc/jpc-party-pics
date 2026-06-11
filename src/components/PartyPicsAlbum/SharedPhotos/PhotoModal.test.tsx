@@ -11,7 +11,7 @@ vi.mock("@aws-amplify/ui-react", () => ({
     children: React.ReactNode;
     onClick?: () => void;
   }) => <button onClick={onClick}>{children}</button>,
-  Card: ({
+  Flex: ({
     children,
     onKeyUpCapture,
   }: {
@@ -19,7 +19,7 @@ vi.mock("@aws-amplify/ui-react", () => ({
     onKeyUpCapture?: (e: { keyCode: number }) => void;
   }) => (
     <div
-      data-testid="card"
+      data-testid="flex-container"
       onKeyUpCapture={onKeyUpCapture as unknown as React.KeyboardEventHandler}
     >
       {children}
@@ -33,7 +33,10 @@ vi.mock("@aws-amplify/ui-react", () => ({
     onClick?: () => void;
   }) => <span onClick={onClick}>{children}</span>,
   useTheme: () => ({
-    tokens: { space: { medium: "8px", large: "16px" } },
+    tokens: {
+      space: { small: "4px", medium: "8px", xs: "2px", large: "16px" },
+      radii: { large: { value: "8px" } },
+    },
   }),
 }));
 
@@ -166,7 +169,7 @@ describe("PhotoModal", () => {
         onDelete={vi.fn()}
       />,
     );
-    fireEvent.click(screen.getByText(/download/));
+    fireEvent.click(screen.getByText(/Download/));
     expect(onDownload).toHaveBeenCalledWith("photo.jpg");
   });
 
@@ -182,7 +185,7 @@ describe("PhotoModal", () => {
         onDelete={onDelete}
       />,
     );
-    fireEvent.click(screen.getByText("Delete photo"));
+    fireEvent.click(screen.getByText("Delete"));
     expect(onDelete).toHaveBeenCalledWith("photo.jpg");
   });
 
@@ -212,7 +215,8 @@ describe("PhotoModal", () => {
         onDelete={vi.fn()}
       />,
     );
-    fireEvent.keyUp(screen.getByTestId("card"), { keyCode: 39 });
+    const containers = screen.getAllByTestId("flex-container");
+    fireEvent.keyUp(containers[0], { keyCode: 39 });
     expect(onForward).toHaveBeenCalledWith(image);
   });
 
@@ -228,7 +232,8 @@ describe("PhotoModal", () => {
         onDelete={vi.fn()}
       />,
     );
-    fireEvent.keyUp(screen.getByTestId("card"), { keyCode: 37 });
+    const containers = screen.getAllByTestId("flex-container");
+    fireEvent.keyUp(containers[0], { keyCode: 37 });
     expect(onBack).toHaveBeenCalledWith(image);
   });
 
@@ -245,7 +250,8 @@ describe("PhotoModal", () => {
         onDelete={vi.fn()}
       />,
     );
-    fireEvent.keyUp(screen.getByTestId("card"), { keyCode: 13 });
+    const containers = screen.getAllByTestId("flex-container");
+    fireEvent.keyUp(containers[0], { keyCode: 13 });
     expect(onBack).not.toHaveBeenCalled();
     expect(onForward).not.toHaveBeenCalled();
   });
