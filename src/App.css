@@ -52,3 +52,20 @@
 .amplify-flex {
   justify-content: center;
 }
+
+.amplify-collection-items {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 999px) {
+  .amplify-collection-items {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .download-all-btn {
+    width: 100% !important;
+  }
+}

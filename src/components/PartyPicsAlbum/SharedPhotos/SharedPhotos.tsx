@@ -68,6 +68,7 @@ export const SharedPhotos = (props: { albumName: string }) => {
         marginTop={tokens.space.medium}
         marginBottom={tokens.space.large}
         isFullWidth={isMobileScreenSize}
+        className="download-all-btn"
         padding={tokens.space.medium}
         onClick={gallery.downloadAll}
       >
