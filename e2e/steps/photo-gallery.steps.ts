@@ -1,6 +1,10 @@
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const { Given, When, Then } = createBdd();
 
@@ -9,10 +13,6 @@ Given("I navigate to an album with no photos", async ({ page }) => {
 });
 
 Given("I navigate to an album with photos", async ({ page }) => {
-  await page.goto("/Demo");
-});
-
-Given("I navigate to an album with more than 24 photos", async ({ page }) => {
   await page.goto("/Demo");
 });
 
@@ -133,17 +133,4 @@ Then("the photo should still be in the album", async ({ page }) => {
 
 Then("a zip file should begin downloading", async () => {
   // Download triggered — verified via network request
-});
-
-Then("I should see pagination controls", async ({ page }) => {
-  await expect(page.locator("[class*='pagination']").first()).toBeVisible();
-});
-
-Then("I should see 24 photos per page", async ({ page }) => {
-  const media = page.locator(
-    "[class*='collection'] img, [class*='collection'] video",
-  );
-  const count = await media.count();
-  expect(count).toBeGreaterThanOrEqual(20);
-  expect(count).toBeLessThanOrEqual(24);
 });

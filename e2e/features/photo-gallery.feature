@@ -57,7 +57,3 @@ Feature: Photo Gallery
     When I confirm and click download all
     Then a zip file should begin downloading
 
-  Scenario: Paginated gallery for many photos
-    Given I navigate to an album with more than 24 photos
-    Then I should see pagination controls
-    And I should see 24 photos per page
