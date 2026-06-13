@@ -119,24 +119,17 @@ function main() {
     process.exit(0);
   }
 
-  const strict = process.argv.includes("--strict");
-
-  console.warn(
-    `CRAP check: ${violations.length} function(s) exceed threshold of ${CRAP_THRESHOLD}:\n`,
+  console.error(
+    `CRAP check failed: ${violations.length} function(s) exceed threshold of ${CRAP_THRESHOLD}:\n`,
   );
   for (const v of violations) {
-    console.warn(`  ${v.file} → ${v.fn}`);
-    console.warn(
+    console.error(`  ${v.file} → ${v.fn}`);
+    console.error(
       `    CRAP: ${v.crap} | Complexity: ${v.complexity} | Coverage: ${v.coverage}%\n`,
     );
   }
 
-  if (strict) {
-    process.exit(1);
-  } else {
-    console.warn("Run with --strict to fail the build on CRAP violations.");
-    process.exit(0);
-  }
+  process.exit(1);
 }
 
 main();

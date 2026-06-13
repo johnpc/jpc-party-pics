@@ -1,13 +1,20 @@
 import "@aws-amplify/ui-react/styles.css";
 import "./App.css";
+import { Suspense, lazy } from "react";
 import { Amplify } from "aws-amplify";
 import config from "../amplify_outputs.json";
 import { PartyPicsAlbum } from "./components/PartyPicsAlbum/PartyPicsAlbum";
 import { CreateAlbum } from "./components/CreateAlbum";
-import { Camera } from "./components/Camera/Camera";
-import { Kiosk } from "./components/Kiosk";
 import { Header } from "./components/Header";
-import { Divider, useTheme } from "@aws-amplify/ui-react";
+import { Divider, Loader, useTheme } from "@aws-amplify/ui-react";
+
+const Camera = lazy(() =>
+  import("./components/Camera/Camera").then((m) => ({ default: m.Camera })),
+);
+const Kiosk = lazy(() =>
+  import("./components/Kiosk").then((m) => ({ default: m.Kiosk })),
+);
+
 Amplify.configure(config);
 function App() {
   const { tokens } = useTheme();
@@ -28,9 +35,13 @@ function App() {
       {!albumName ? (
         <CreateAlbum />
       ) : isCamera ? (
-        <Camera albumName={albumName} />
+        <Suspense fallback={<Loader variation="linear" />}>
+          <Camera albumName={albumName} />
+        </Suspense>
       ) : isKiosk ? (
-        <Kiosk albumName={albumName} />
+        <Suspense fallback={<Loader variation="linear" />}>
+          <Kiosk albumName={albumName} />
+        </Suspense>
       ) : (
         <PartyPicsAlbum albumName={albumName} />
       )}

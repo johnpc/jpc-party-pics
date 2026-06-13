@@ -12,6 +12,20 @@ import { processUploadItem } from "./useUploadProcessor";
 const MAX_RETRIES = 3;
 const MAX_CONCURRENT = 3;
 
+function findProcessable(
+  items: QueuedUpload[],
+  albumName: string,
+  inFlight: Set<string>,
+): QueuedUpload[] {
+  return items.filter(
+    (i) =>
+      i.albumName === albumName &&
+      (i.status === "pending" || i.status === "error") &&
+      i.retryCount < MAX_RETRIES &&
+      !inFlight.has(i.id),
+  );
+}
+
 const makeHash = (length: number): string => {
   let result = "";
   const chars =
@@ -44,13 +58,7 @@ export function useUploadQueue(albumName: string) {
     if (activeUploads.current >= MAX_CONCURRENT) return;
 
     const items = await getAllQueued();
-    const pending = items.filter(
-      (i) =>
-        i.albumName === albumName &&
-        (i.status === "pending" || i.status === "error") &&
-        i.retryCount < MAX_RETRIES &&
-        !inFlightIds.current.has(i.id),
-    );
+    const pending = findProcessable(items, albumName, inFlightIds.current);
 
     for (const item of pending) {
       if (activeUploads.current >= MAX_CONCURRENT) break;

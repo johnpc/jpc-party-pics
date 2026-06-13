@@ -5,11 +5,13 @@ import { createElement } from "react";
 import { useCamera } from "./useCamera";
 
 const mockMutateAsync = vi.fn().mockResolvedValue({});
-const mockUploadData = vi.fn().mockReturnValue({ result: Promise.resolve({}) });
-const mockCompressMedia = vi.fn().mockResolvedValue({
-  file: new File([], "compressed.jpg"),
-  key: "public/album/hash/compressed.jpg",
-});
+const mockUploadPhoto = vi
+  .fn()
+  .mockResolvedValue("public/album/hash/photo.jpg");
+const mockUploadVideo = vi
+  .fn()
+  .mockResolvedValue("public/album/hash/video.webm");
+const mockIsVideoTooShort = vi.fn().mockReturnValue(false);
 
 const mockStop = vi.fn();
 const mockPlay = vi.fn().mockResolvedValue(undefined);
@@ -17,12 +19,10 @@ const mockGetUserMedia = vi.fn().mockResolvedValue({
   getTracks: () => [{ stop: mockStop }],
 });
 
-vi.mock("aws-amplify/storage", () => ({
-  uploadData: (...args: unknown[]) => mockUploadData(...args),
-}));
-
-vi.mock("../helpers/compressMedia", () => ({
-  compressMedia: (...args: unknown[]) => mockCompressMedia(...args),
+vi.mock("../helpers/cameraUpload", () => ({
+  uploadPhoto: (...args: unknown[]) => mockUploadPhoto(...args),
+  uploadVideo: (...args: unknown[]) => mockUploadVideo(...args),
+  isVideoTooShort: (...args: unknown[]) => mockIsVideoTooShort(...args),
 }));
 
 vi.mock("./useImages", () => ({
@@ -128,7 +128,7 @@ describe("useCamera", () => {
       await result.current.capturePhoto();
     });
 
-    expect(mockCompressMedia).not.toHaveBeenCalled();
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
   });
 
   it("startRecording does nothing when stream is null", () => {
@@ -221,8 +221,7 @@ describe("useCamera", () => {
     });
 
     await waitFor(() => {
-      expect(mockCompressMedia).toHaveBeenCalled();
-      expect(mockUploadData).toHaveBeenCalled();
+      expect(mockUploadPhoto).toHaveBeenCalled();
       expect(mockMutateAsync).toHaveBeenCalled();
     });
   });
@@ -256,13 +255,11 @@ describe("useCamera", () => {
       await result.current.capturePhoto();
     });
 
-    expect(mockCompressMedia).not.toHaveBeenCalled();
+    expect(mockUploadPhoto).not.toHaveBeenCalled();
   });
 
   it("capturePhoto handles upload failure", async () => {
-    mockUploadData.mockReturnValueOnce({
-      result: Promise.reject(new Error("Upload failed")),
-    });
+    mockUploadPhoto.mockRejectedValueOnce(new Error("Upload failed"));
 
     const mockGetContext = vi.fn().mockReturnValue({ drawImage: vi.fn() });
     const mockToBlob = vi.fn((cb: (blob: Blob | null) => void) => {
@@ -298,6 +295,8 @@ describe("useCamera", () => {
   });
 
   it("discards recordings smaller than 50KB", async () => {
+    mockIsVideoTooShort.mockReturnValue(true);
+
     let capturedOnStop: (() => void) | null = null;
     let capturedOnData: ((e: { data: Blob }) => void) | null = null;
 
@@ -339,8 +338,10 @@ describe("useCamera", () => {
       result.current.stopRecording();
     });
 
-    expect(mockUploadData).not.toHaveBeenCalled();
+    expect(mockUploadVideo).not.toHaveBeenCalled();
     expect(result.current.status).toBe("idle");
+
+    mockIsVideoTooShort.mockReturnValue(false);
   });
 
   it("recording onstop uploads video successfully", async () => {
@@ -388,7 +389,7 @@ describe("useCamera", () => {
     });
 
     await waitFor(() => {
-      expect(mockUploadData).toHaveBeenCalled();
+      expect(mockUploadVideo).toHaveBeenCalled();
       expect(mockMutateAsync).toHaveBeenCalled();
     });
   });
