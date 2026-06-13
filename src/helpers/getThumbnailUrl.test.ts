@@ -27,7 +27,7 @@ describe("getThumbnailUrl", () => {
       path: "thumbnails/wedding/abc/photo.jpg",
       options: {
         validateObjectExistence: true,
-        expiresIn: 300,
+        expiresIn: 3600,
         useAccelerateEndpoint: true,
       },
     });

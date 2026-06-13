@@ -1,11 +1,10 @@
 import { Image, useTheme } from "@aws-amplify/ui-react";
 import { Schema } from "../../../../amplify/data/resource";
-import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
-import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
 import { canPlayVideoFile } from "../../../helpers/videoSupport";
 import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
 import { VideoFallback } from "./VideoFallback";
+import { useImageUrl } from "../../../hooks/useImageUrl";
 
 const mediaStyle = isMobileScreenSize
   ? { width: "100%", maxHeight: "70vh", objectFit: "contain" as const }
@@ -18,14 +17,7 @@ const mediaStyle = isMobileScreenSize
 
 export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
   const { tokens } = useTheme();
-  const [url, setUrl] = useState<URL>();
-  useEffect(() => {
-    const fetchUrl = async () => {
-      const url = await getAccelerateUrl(props.image.key);
-      setUrl(url);
-    };
-    fetchUrl();
-  }, [props.image.key]);
+  const url = useImageUrl(props.image.key, true, "full");
 
   const fileType = detectFileType(props.image.key);
   const isUnsupportedVideo =
@@ -33,16 +25,13 @@ export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
 
   if (isUnsupportedVideo) {
     return (
-      <VideoFallback
-        url={url?.toString()}
-        style={{ width: "80%", maxHeight: "50vh" }}
-      />
+      <VideoFallback url={url} style={{ width: "80%", maxHeight: "50vh" }} />
     );
   }
 
   return fileType === "image" ? (
     <Image
-      src={url?.toString()}
+      src={url}
       style={{ borderRadius: tokens.radii.large.value, ...mediaStyle }}
       key={props.image.key}
       alt={props.image.key}
@@ -57,7 +46,7 @@ export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
       autoPlay={true}
       loop={true}
       muted={true}
-      src={url?.toString()}
+      src={url}
     />
   );
 };

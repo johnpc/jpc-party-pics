@@ -6,7 +6,7 @@ export const getThumbnailUrl = async (key: string): Promise<URL> => {
     path: thumbnailKey,
     options: {
       validateObjectExistence: true,
-      expiresIn: 300,
+      expiresIn: 3600,
       useAccelerateEndpoint: true,
     },
   });
