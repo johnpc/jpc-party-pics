@@ -24,3 +24,11 @@ export const transcodeVideo = defineFunction({
   memoryMB: 1024 * 2,
   resourceGroupName: "storage",
 });
+
+export const generateThumbnail = defineFunction({
+  name: "generateThumbnail",
+  entry: "./generateThumbnail.ts",
+  timeoutSeconds: 30,
+  memoryMB: 512,
+  resourceGroupName: "storage",
+});

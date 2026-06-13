@@ -22,5 +22,6 @@ export const storage = defineStorage({
       resource(getPartyPicsZipFile).to(["read", "write"]),
       resource(deletePartyPic).to(["read", "write", "delete"]),
     ],
+    "thumbnails/*": [authenticated.to(["read"]), guest.to(["read"])],
   }),
 });

@@ -5,7 +5,11 @@ import { defineBackend } from "@aws-amplify/backend";
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { storage } from "./storage/resource";
-import { getPartyPicsZipFile, transcodeVideo } from "./function/resource";
+import {
+  getPartyPicsZipFile,
+  transcodeVideo,
+  generateThumbnail,
+} from "./function/resource";
 
 const backend = defineBackend({
   auth,
@@ -13,6 +17,7 @@ const backend = defineBackend({
   storage,
   getPartyPicsZipFile,
   transcodeVideo,
+  generateThumbnail,
 });
 
 const { cfnBucket } = backend.storage.resources.cfnResources;
@@ -78,3 +83,24 @@ s3Bucket.addEventNotification(
   new s3notifications.LambdaDestination(transcodeLambda),
   { prefix: "public/", suffix: ".mov" },
 );
+
+// Thumbnail generation Lambda
+const thumbnailLambda = backend.generateThumbnail.resources
+  .lambda as lambda.Function;
+thumbnailLambda.addLayers(
+  lambda.LayerVersion.fromLayerVersionArn(
+    thumbnailLambda,
+    "FfmpegLayerThumb",
+    `arn:aws:lambda:${thumbnailLambda.stack.region}:${thumbnailLambda.stack.account}:layer:ffmpeg:1`,
+  ),
+);
+s3Bucket.grantReadWrite(thumbnailLambda);
+
+const imageExtensions = [".jpg", ".jpeg", ".png", ".heic", ".gif"];
+for (const ext of imageExtensions) {
+  s3Bucket.addEventNotification(
+    s3.EventType.OBJECT_CREATED,
+    new s3notifications.LambdaDestination(thumbnailLambda),
+    { prefix: "public/", suffix: ext },
+  );
+}

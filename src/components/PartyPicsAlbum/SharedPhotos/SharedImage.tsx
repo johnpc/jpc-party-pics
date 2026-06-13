@@ -3,6 +3,7 @@ import { Schema } from "../../../../amplify/data/resource";
 import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
 import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
+import { getThumbnailUrl } from "../../../helpers/getThumbnailUrl";
 import { canPlayVideoFile } from "../../../helpers/videoSupport";
 import { VideoFallback } from "./VideoFallback";
 import { useInView } from "../../../hooks/useInView";
@@ -17,7 +18,17 @@ export const SharedImage = (props: {
 
   useEffect(() => {
     if (!inView) return;
+    const fileType = detectFileType(props.image.key);
     const fetchUrl = async () => {
+      if (fileType === "image") {
+        try {
+          const thumbUrl = await getThumbnailUrl(props.image.key);
+          setUrl(thumbUrl);
+          return;
+        } catch {
+          // Thumbnail not yet generated, fall back to full-size
+        }
+      }
       const resolved = await getAccelerateUrl(props.image.key);
       setUrl(resolved);
     };
