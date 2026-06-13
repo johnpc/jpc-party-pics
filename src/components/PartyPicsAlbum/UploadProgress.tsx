@@ -79,6 +79,7 @@ export function UploadProgress(props: { queue: QueuedUpload[] }) {
       direction="column"
       gap={tokens.space.xs}
       padding={tokens.space.small}
+      className="upload-progress-list"
       style={{
         backgroundColor: "rgba(255,255,255,0.98)",
         borderRadius: "8px",
