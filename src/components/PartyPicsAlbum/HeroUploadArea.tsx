@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { Button, Flex, Text, useTheme, View } from "@aws-amplify/ui-react";
 import { isMobileScreenSize } from "../../helpers/isMobileScreenSize";
 
@@ -13,15 +12,8 @@ interface HeroUploadAreaProps {
 
 export function HeroUploadArea(props: HeroUploadAreaProps) {
   const { tokens } = useTheme();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const btnSize = isMobileScreenSize ? "large" : undefined;
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      props.onFilesSelected(e.target.files);
-      e.target.value = "";
-    }
-  };
+  const btnPad = isMobileScreenSize ? "12px 24px" : "8px 16px";
 
   return (
     <View
@@ -36,41 +28,15 @@ export function HeroUploadArea(props: HeroUploadAreaProps) {
       <Text color="white" fontWeight="bold" fontSize="large">
         Add your photos &amp; videos
       </Text>
-      <input
-        ref={fileInputRef}
-        id="hero-file-input"
-        type="file"
-        accept="image/*,video/*"
-        multiple
-        onChange={handleFileChange}
-        style={{
-          position: "absolute",
-          width: "1px",
-          height: "1px",
-          overflow: "hidden",
-          clip: "rect(0,0,0,0)",
-        }}
-      />
       <Flex
         justifyContent="center"
         gap={tokens.space.medium}
         marginTop={tokens.space.medium}
       >
-        <label
-          htmlFor="hero-file-input"
-          style={{
-            display: "inline-block",
-            cursor: "pointer",
-            backgroundColor: "white",
-            color: "#764ba2",
-            fontWeight: "bold",
-            padding: isMobileScreenSize ? "12px 24px" : "8px 16px",
-            borderRadius: "4px",
-            fontSize: isMobileScreenSize ? "16px" : "14px",
-          }}
-        >
-          📁 Choose Files
-        </label>
+        <FilePickerButton
+          padding={btnPad}
+          onFilesSelected={props.onFilesSelected}
+        />
         <Button
           size={btnSize}
           onClick={props.onTapCamera}
@@ -84,13 +50,56 @@ export function HeroUploadArea(props: HeroUploadAreaProps) {
           📸 Camera
         </Button>
       </Flex>
-      <UploadStatus
-        isUploading={props.isUploading}
-        activeCount={props.activeCount}
-        errorCount={props.errorCount}
-        onRetry={props.onRetry}
-      />
+      {(props.isUploading || props.errorCount > 0) && (
+        <UploadStatus
+          isUploading={props.isUploading}
+          activeCount={props.activeCount}
+          errorCount={props.errorCount}
+          onRetry={props.onRetry}
+        />
+      )}
     </View>
+  );
+}
+
+function FilePickerButton(props: {
+  padding: string;
+  onFilesSelected: (files: FileList) => void;
+}) {
+  return (
+    <label
+      style={{
+        position: "relative",
+        display: "inline-block",
+        overflow: "hidden",
+        cursor: "pointer",
+        backgroundColor: "white",
+        color: "#764ba2",
+        fontWeight: "bold",
+        padding: props.padding,
+        borderRadius: "4px",
+        fontSize: isMobileScreenSize ? "16px" : "14px",
+      }}
+    >
+      📁 Choose Files
+      <input
+        type="file"
+        accept="image/*,video/*"
+        multiple
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            props.onFilesSelected(e.target.files);
+            e.target.value = "";
+          }
+        }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          opacity: 0,
+          cursor: "pointer",
+        }}
+      />
+    </label>
   );
 }
 
@@ -101,8 +110,6 @@ function UploadStatus(props: {
   onRetry: () => void;
 }) {
   const { tokens } = useTheme();
-
-  if (!props.isUploading && props.errorCount === 0) return null;
 
   return (
     <>

@@ -38,7 +38,7 @@ describe("HeroUploadArea", () => {
     onRetry: vi.fn(),
   };
 
-  it("renders upload label and camera button", () => {
+  it("renders upload and camera buttons", () => {
     renderWithProviders(<HeroUploadArea {...defaultProps} />);
     expect(screen.getByText("📁 Choose Files")).toBeInTheDocument();
     expect(screen.getByText("📸 Camera")).toBeInTheDocument();
