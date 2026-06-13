@@ -41,12 +41,14 @@ Feature: Photo Gallery
     Then the photo should open in a new tab
 
   Scenario: Delete photo with confirmation
-    Given the photo modal is open
+    Given I have uploaded a photo to the test album
+    And the photo modal is open on a test album
     When I confirm and delete the photo
     Then the photo should be removed from the album
 
   Scenario: Cancel delete does not remove photo
-    Given the photo modal is open
+    Given I have uploaded a photo to the test album
+    And the photo modal is open on a test album
     When I dismiss and click delete
     Then the photo should still be in the album
 
