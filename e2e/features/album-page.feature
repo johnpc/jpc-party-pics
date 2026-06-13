@@ -3,31 +3,32 @@ Feature: Album Page
   I want to access an album page
   So that I can upload and view shared photos
 
-  Scenario: Album page shows QR code for sharing
+  Scenario: Album page shows QR code after clicking Share
     Given I navigate to album "wedding"
+    When I click "🔗 Share"
     Then I should see a QR code
-    And I should see "Share this album link via QR code or copy/paste"
 
-  Scenario: Album page shows file uploader
+  Scenario: Album page shows file upload area
     Given I navigate to album "wedding"
-    Then I should see the file uploader
-    And the uploader should accept images and videos
+    Then I should see the upload hero area
 
   Scenario: Album page shows camera button
     Given I navigate to album "wedding"
-    Then I should see a button "Use In-App Camera"
+    Then I should see a button "📸 Camera"
 
   Scenario: Camera button navigates to camera mode
     Given I navigate to album "wedding"
-    When I click "Use In-App Camera"
+    When I click "📸 Camera"
     Then I should be redirected to "/wedding/camera"
 
-  Scenario: Album page shows copy link buttons
+  Scenario: Album page shows copy link buttons after Share
     Given I navigate to album "wedding"
+    When I click "🔗 Share"
     Then I should see a button "Copy Album Link"
     And I should see a button "Copy Kiosk Link"
 
   Scenario: Copy link shows confirmation
     Given I navigate to album "wedding"
-    When I click "Copy Album Link"
+    When I click "🔗 Share"
+    And I click "Copy Album Link"
     Then the button should briefly show a checkmark
