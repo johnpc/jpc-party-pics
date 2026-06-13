@@ -1,7 +1,6 @@
 import QRCode from "react-qr-code";
 import {
   Button,
-  Divider,
   Flex,
   Heading,
   Text,
@@ -11,7 +10,6 @@ import {
 import { CopyLink } from "./CopyLink";
 import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
 import { useState } from "react";
-import { isMobileScreenSize } from "../../helpers/isMobileScreenSize";
 import { useUploadQueue } from "../../hooks/useUploadQueue";
 import { UploadProgress } from "./UploadProgress";
 import { HeroUploadArea } from "./HeroUploadArea";
@@ -62,10 +60,6 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
       <UploadProgress queue={uploadQueue.queue} />
 
       <SharedPhotos albumName={props.albumName} />
-
-      {!isMobileScreenSize && !showShare && (
-        <DesktopQrSection albumUrl={albumUrl} kioskUrl={kioskUrl} />
-      )}
     </>
   );
 };
@@ -99,37 +93,6 @@ function SharePanel(props: { albumUrl: string; kioskUrl: string }) {
           label="Copy Kiosk Link"
           variation="link"
         />
-      </Flex>
-    </View>
-  );
-}
-
-function DesktopQrSection(props: { albumUrl: string; kioskUrl: string }) {
-  const { tokens } = useTheme();
-
-  return (
-    <View marginTop={tokens.space.medium}>
-      <Divider marginBottom={tokens.space.medium} />
-      <Flex alignItems="center" gap={tokens.space.large}>
-        <QRCode
-          size={128}
-          style={{ height: "auto", minWidth: "128px" }}
-          value={props.albumUrl}
-          viewBox="0 0 128 128"
-        />
-        <Flex direction="column" gap={tokens.space.xs}>
-          <Text fontSize={tokens.fontSizes.small}>
-            Scan to open on your phone
-          </Text>
-          <Flex gap={tokens.space.small} wrap="wrap">
-            <CopyLink link={props.albumUrl} />
-            <CopyLink
-              link={props.kioskUrl}
-              label="Copy Kiosk Link"
-              variation="link"
-            />
-          </Flex>
-        </Flex>
       </Flex>
     </View>
   );

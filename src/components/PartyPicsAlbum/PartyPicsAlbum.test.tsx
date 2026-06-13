@@ -11,7 +11,6 @@ vi.mock("@aws-amplify/ui-react", () => ({
     children: React.ReactNode;
     onClick?: () => void;
   }) => <button onClick={onClick}>{children}</button>,
-  Divider: () => <hr />,
   Flex: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Heading: ({ children }: { children: React.ReactNode }) => <h4>{children}</h4>,
   Text: ({ children }: { children: React.ReactNode }) => (
@@ -67,10 +66,6 @@ vi.mock("../../hooks/useUploadQueue", () => ({
   }),
 }));
 
-vi.mock("../../helpers/isMobileScreenSize", () => ({
-  isMobileScreenSize: false,
-}));
-
 describe("PartyPicsAlbum", () => {
   beforeEach(() => {
     Object.defineProperty(window, "location", {
@@ -108,16 +103,12 @@ describe("PartyPicsAlbum", () => {
   it("shows QR code when Share is clicked", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
     fireEvent.click(screen.getByText("🔗 Share"));
-    expect(screen.getAllByTestId("qr-code").length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("shows QR code on desktop by default", () => {
-    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
     expect(screen.getByTestId("qr-code")).toBeInTheDocument();
   });
 
-  it("renders copy link buttons on desktop", () => {
+  it("shows copy links when Share is clicked", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    fireEvent.click(screen.getByText("🔗 Share"));
     const copyLinks = screen.getAllByTestId("copy-link");
     expect(copyLinks.length).toBeGreaterThanOrEqual(2);
   });
