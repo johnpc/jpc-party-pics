@@ -73,3 +73,8 @@ s3Bucket.addEventNotification(
   new s3notifications.LambdaDestination(transcodeLambda),
   { prefix: "public/", suffix: ".flv" },
 );
+s3Bucket.addEventNotification(
+  s3.EventType.OBJECT_CREATED,
+  new s3notifications.LambdaDestination(transcodeLambda),
+  { prefix: "public/", suffix: ".mov" },
+);
