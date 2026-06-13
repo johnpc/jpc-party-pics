@@ -96,8 +96,8 @@ thumbnailLambda.addLayers(
 );
 s3Bucket.grantReadWrite(thumbnailLambda);
 
-const imageExtensions = [".jpg", ".jpeg", ".png", ".heic", ".gif"];
-for (const ext of imageExtensions) {
+const thumbnailExtensions = [".jpg", ".jpeg", ".png", ".heic", ".gif", ".mp4"];
+for (const ext of thumbnailExtensions) {
   s3Bucket.addEventNotification(
     s3.EventType.OBJECT_CREATED,
     new s3notifications.LambdaDestination(thumbnailLambda),

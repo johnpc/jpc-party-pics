@@ -54,8 +54,10 @@ describe("useImageUrl", () => {
     });
   });
 
-  it("fetches full URL directly for videos", async () => {
+  it("tries thumbnail for videos, falls back to full", async () => {
+    const { getThumbnailUrl } = await import("../helpers/getThumbnailUrl");
     const { getAccelerateUrl } = await import("../helpers/getAccelerateUrl");
+    vi.mocked(getThumbnailUrl).mockRejectedValue(new Error("Not found"));
     vi.mocked(getAccelerateUrl).mockResolvedValue(
       new URL("https://example.com/video.mp4"),
     );
@@ -67,6 +69,22 @@ describe("useImageUrl", () => {
 
     await waitFor(() => {
       expect(result.current).toBe("https://example.com/video.mp4");
+    });
+  });
+
+  it("uses video thumbnail when available", async () => {
+    const { getThumbnailUrl } = await import("../helpers/getThumbnailUrl");
+    vi.mocked(getThumbnailUrl).mockResolvedValue(
+      new URL("https://example.com/thumb-video.mp4"),
+    );
+
+    const { result } = renderHook(
+      () => useImageUrl("public/album/video.mp4", true),
+      { wrapper: createWrapper() },
+    );
+
+    await waitFor(() => {
+      expect(result.current).toBe("https://example.com/thumb-video.mp4");
     });
   });
 
