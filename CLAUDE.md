@@ -291,12 +291,19 @@ Defined in `amplify/backend.ts`:
 
 ## Key Patterns
 
-- **Videos:** Uploaded as `.mp4` when possible (iOS), `.webm` on Chrome. The transcodeVideo Lambda auto-converts non-mp4 to mp4 on upload via S3 event notification. Frontend shows a download fallback for formats the browser can't play.
+- **Videos:** Uploaded as `.mp4` when possible (iOS), `.webm` on Chrome. The transcodeVideo Lambda auto-converts non-mp4 to mp4 on upload via S3 event notification. Frontend shows a download fallback for formats the browser can't play. Minimum 50KB size enforced — recordings shorter than ~1-2s are discarded.
 - **Images:** Compressed client-side via `browser-image-compression` before upload (max 1.5MB, 1920px).
 - **S3 Accelerate:** All storage URLs use Transfer Acceleration endpoint for faster global uploads/downloads.
 - **Real-time:** AppSync subscriptions on AlbumImageKey onCreate/onDelete update the react-query cache instantly.
 - **Offline-resilient uploads:** Upload queue persists in IndexedDB; files cached in CacheStorage. If the user navigates away or closes the tab, pending uploads can resume on return.
 - **No auth required:** Everything uses Cognito guest/unauthenticated identity. Zero registration friction.
+
+## Gotchas & Legacy Details
+
+- **S3 key format changed over time.** Older uploads used `public/{albumName}{filename}` (no slash between album and file, e.g. `public/DemoIMG_0282.jpeg`). Newer uploads use `public/{albumName}/{hash}/{id}-{filename}`. The `getPartyPicsImages` Lambda uses `Prefix: public/${albumName}` which matches both formats — this is intentional and must not be changed.
+- **E2E tests run against real prod backend.** They spin up a local dev server (`localhost:5173`) with `amplify_outputs.json` generated from the live deployment. Changes to production data (like deleting S3 objects) can break E2E tests.
+- **Camera uses fake streams in CI.** Playwright config uses `--use-fake-device-for-media-stream` so recordings produce low-bitrate data. The E2E camera test needs a few seconds of recording to exceed the 50KB minimum threshold.
+- **The pagination E2E test depends on the Demo album having >24 photos in production S3.** If photos are deleted from the Demo album, this test will fail.
 
 ## File Size Discipline
 
