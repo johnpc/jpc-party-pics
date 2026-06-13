@@ -1,6 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createElement, ReactNode } from "react";
 import { useUploadQueue } from "./useUploadQueue";
+
+const wrapper = ({ children }: { children: ReactNode }) =>
+  createElement(
+    QueryClientProvider,
+    {
+      client: new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      }),
+    },
+    children,
+  );
 
 vi.mock("aws-amplify/storage", () => ({
   uploadData: vi.fn(() => ({
@@ -52,7 +65,7 @@ describe("useUploadQueue", () => {
   });
 
   it("starts with empty queue", async () => {
-    const { result } = renderHook(() => useUploadQueue("wedding"));
+    const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     await act(async () => {});
     expect(result.current.queue).toEqual([]);
     expect(result.current.isUploading).toBe(false);
@@ -61,7 +74,7 @@ describe("useUploadQueue", () => {
   });
 
   it("addFiles queues files for upload", async () => {
-    const { result } = renderHook(() => useUploadQueue("wedding"));
+    const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     const file = new File(["hello"], "test.jpg", { type: "image/jpeg" });
 
     await act(async () => {
@@ -80,7 +93,7 @@ describe("useUploadQueue", () => {
   });
 
   it("addFiles queues multiple files", async () => {
-    const { result } = renderHook(() => useUploadQueue("wedding"));
+    const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     const files = [
       new File(["a"], "a.jpg", { type: "image/jpeg" }),
       new File(["b"], "b.jpg", { type: "image/jpeg" }),
@@ -109,7 +122,7 @@ describe("useUploadQueue", () => {
       },
     ]);
 
-    const { result } = renderHook(() => useUploadQueue("wedding"));
+    const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     await act(async () => {});
     expect(result.current.errorCount).toBe(1);
   });
@@ -130,7 +143,7 @@ describe("useUploadQueue", () => {
       },
     ]);
 
-    const { result } = renderHook(() => useUploadQueue("wedding"));
+    const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     await act(async () => {});
 
     await act(async () => {
@@ -168,7 +181,7 @@ describe("useUploadQueue", () => {
       },
     ]);
 
-    const { result } = renderHook(() => useUploadQueue("wedding"));
+    const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     await act(async () => {});
     expect(result.current.queue).toHaveLength(1);
     expect(result.current.queue[0].id).toBe("a-1");
@@ -190,7 +203,7 @@ describe("useUploadQueue", () => {
       },
     ]);
 
-    const { result } = renderHook(() => useUploadQueue("wedding"));
+    const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     await act(async () => {});
 
     await act(async () => {

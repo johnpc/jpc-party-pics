@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   QueuedUpload,
   addToQueue,
@@ -25,6 +26,8 @@ export function useUploadQueue(albumName: string) {
   const [queue, setQueue] = useState<QueuedUpload[]>([]);
   const activeUploads = useRef(0);
   const hashRef = useRef(makeHash(5));
+  const inFlightIds = useRef(new Set<string>());
+  const queryClient = useQueryClient();
 
   const refreshQueue = useCallback(async () => {
     const items = await getAllQueued();
@@ -35,6 +38,8 @@ export function useUploadQueue(albumName: string) {
     refreshQueue();
   }, [refreshQueue]);
 
+  const processNextRef = useRef<() => Promise<void>>();
+
   const processNext = useCallback(async () => {
     if (activeUploads.current >= MAX_CONCURRENT) return;
 
@@ -43,20 +48,27 @@ export function useUploadQueue(albumName: string) {
       (i) =>
         i.albumName === albumName &&
         (i.status === "pending" || i.status === "error") &&
-        i.retryCount < MAX_RETRIES,
+        i.retryCount < MAX_RETRIES &&
+        !inFlightIds.current.has(i.id),
     );
 
     for (const item of pending) {
       if (activeUploads.current >= MAX_CONCURRENT) break;
       activeUploads.current++;
+      inFlightIds.current.add(item.id);
       processUploadItem(item, albumName, hashRef.current, refreshQueue).finally(
         () => {
           activeUploads.current--;
+          inFlightIds.current.delete(item.id);
           refreshQueue();
+          queryClient.invalidateQueries({ queryKey: ["images", albumName] });
+          setTimeout(() => processNextRef.current?.(), 0);
         },
       );
     }
-  }, [albumName, refreshQueue]);
+  }, [albumName, queryClient, refreshQueue]);
+
+  processNextRef.current = processNext;
 
   const addFiles = useCallback(
     async (files: FileList | File[]) => {

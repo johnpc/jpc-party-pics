@@ -59,6 +59,10 @@
   gap: 12px;
 }
 
+.upload-progress-list {
+  justify-content: flex-start !important;
+}
+
 @media (max-width: 999px) {
   .amplify-collection-items {
     grid-template-columns: 1fr 1fr;
