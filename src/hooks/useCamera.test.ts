@@ -150,11 +150,14 @@ describe("useCamera", () => {
     const MockMediaRecorder = class {
       ondataavailable: ((e: { data: Blob }) => void) | null = null;
       onstop: (() => void) | null = null;
+      state = "recording";
       start() {
         mockStart();
+        this.state = "recording";
       }
       stop() {
         mockRecorderStop();
+        this.state = "inactive";
       }
       static isTypeSupported() {
         return false;
@@ -294,20 +297,72 @@ describe("useCamera", () => {
     });
   });
 
-  it("recording onstop uploads video successfully", async () => {
+  it("discards recordings smaller than 50KB", async () => {
     let capturedOnStop: (() => void) | null = null;
     let capturedOnData: ((e: { data: Blob }) => void) | null = null;
 
     const MockMediaRecorder = class {
+      state = "inactive";
       set ondataavailable(fn: ((e: { data: Blob }) => void) | null) {
         capturedOnData = fn;
       }
       set onstop(fn: (() => void) | null) {
         capturedOnStop = fn;
       }
-      start() {}
+      start() {
+        this.state = "recording";
+      }
       stop() {
-        if (capturedOnData) capturedOnData({ data: new Blob(["video"]) });
+        this.state = "inactive";
+        if (capturedOnData) capturedOnData({ data: new Blob(["tiny"]) });
+        if (capturedOnStop) capturedOnStop();
+      }
+      static isTypeSupported() {
+        return false;
+      }
+    };
+    vi.stubGlobal("MediaRecorder", MockMediaRecorder);
+
+    const { result } = renderHook(() => useCamera("wedding"), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      await result.current.startCamera();
+    });
+
+    act(() => {
+      result.current.startRecording();
+    });
+
+    await act(async () => {
+      result.current.stopRecording();
+    });
+
+    expect(mockUploadData).not.toHaveBeenCalled();
+    expect(result.current.status).toBe("idle");
+  });
+
+  it("recording onstop uploads video successfully", async () => {
+    let capturedOnStop: (() => void) | null = null;
+    let capturedOnData: ((e: { data: Blob }) => void) | null = null;
+
+    const largeVideoData = new Uint8Array(60_000);
+    const MockMediaRecorder = class {
+      state = "inactive";
+      set ondataavailable(fn: ((e: { data: Blob }) => void) | null) {
+        capturedOnData = fn;
+      }
+      set onstop(fn: (() => void) | null) {
+        capturedOnStop = fn;
+      }
+      start() {
+        this.state = "recording";
+      }
+      stop() {
+        this.state = "inactive";
+        if (capturedOnData)
+          capturedOnData({ data: new Blob([largeVideoData]) });
         if (capturedOnStop) capturedOnStop();
       }
       static isTypeSupported() {

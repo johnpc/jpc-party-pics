@@ -2,6 +2,7 @@ import { uploadData } from "aws-amplify/storage";
 import { generateClient } from "aws-amplify/api";
 import { Schema } from "../../amplify/data/resource";
 import { compressMedia } from "../helpers/compressMedia";
+import { detectFileType } from "../helpers/detectFileType";
 import {
   QueuedUpload,
   updateQueueItem,
@@ -38,6 +39,15 @@ export async function processUploadItem(
     const normalizedName = normalizeExtension(item.fileName);
     const key = `public/${albumName}/${hash}/${item.id}-${normalizedName}`;
     const compressed = await compressMedia({ file, key });
+
+    const MIN_VIDEO_SIZE = 50_000;
+    if (
+      detectFileType(compressed.key) === "video" &&
+      compressed.file.size < MIN_VIDEO_SIZE
+    ) {
+      await markError(item, "Video too short to upload", refreshQueue);
+      return;
+    }
 
     await markUploading(item.id, refreshQueue);
     await performUpload(compressed, item.id, refreshQueue);
