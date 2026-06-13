@@ -35,6 +35,7 @@ When("I click the record button", async ({ page }) => {
 });
 
 When("I click the stop button", async ({ page }) => {
+  await page.waitForTimeout(3000);
   await page.getByRole("button", { name: /Stop/ }).click();
 });
 
