@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { renderWithProviders } from "./test/test-utils";
 import App from "./App";
 
@@ -13,6 +13,7 @@ vi.mock("../amplify_outputs.json", () => ({
 
 vi.mock("@aws-amplify/ui-react", () => ({
   Divider: () => <hr />,
+  Loader: () => <div data-testid="loader">Loading...</div>,
   useTheme: () => ({
     tokens: { space: { small: "4px" } },
   }),
@@ -62,22 +63,26 @@ describe("App", () => {
     expect(screen.getByTestId("create-album")).toBeInTheDocument();
   });
 
-  it("renders Camera when path ends with /camera", () => {
+  it("renders Camera when path ends with /camera", async () => {
     Object.defineProperty(window, "location", {
       value: { pathname: "/wedding/camera" },
       writable: true,
     });
     renderWithProviders(<App />);
-    expect(screen.getByTestId("camera")).toHaveTextContent("wedding");
+    await waitFor(() => {
+      expect(screen.getByTestId("camera")).toHaveTextContent("wedding");
+    });
   });
 
-  it("renders Kiosk when path ends with /kiosk", () => {
+  it("renders Kiosk when path ends with /kiosk", async () => {
     Object.defineProperty(window, "location", {
       value: { pathname: "/wedding/kiosk" },
       writable: true,
     });
     renderWithProviders(<App />);
-    expect(screen.getByTestId("kiosk")).toHaveTextContent("wedding");
+    await waitFor(() => {
+      expect(screen.getByTestId("kiosk")).toHaveTextContent("wedding");
+    });
   });
 
   it("renders PartyPicsAlbum for album paths", () => {

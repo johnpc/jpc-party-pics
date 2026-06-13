@@ -25,7 +25,7 @@ export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
       setUrl(url);
     };
     fetchUrl();
-  }, []);
+  }, [props.image.key]);
 
   const fileType = detectFileType(props.image.key);
   const isUnsupportedVideo =
