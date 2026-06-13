@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import path from "path";
 
 const { Given, When, Then } = createBdd();
 
@@ -17,6 +18,24 @@ Given("I navigate to an album with more than 24 photos", async ({ page }) => {
 
 Given("the photo modal is open", async ({ page }) => {
   await page.goto("/Demo");
+  const img = page.locator("img[src*='s3']").first();
+  await img.waitFor({ state: "visible", timeout: 15000 });
+  await img.click();
+});
+
+Given("I have uploaded a photo to the test album", async ({ page }) => {
+  await page.goto("/e2e-test");
+  const fileInput = page.locator('input[type="file"]');
+  const fixturePath = path.resolve(__dirname, "../fixtures/test-photo.jpg");
+  await fileInput.setInputFiles(fixturePath);
+  await page.locator("img[src*='s3']").first().waitFor({
+    state: "visible",
+    timeout: 15000,
+  });
+});
+
+Given("the photo modal is open on a test album", async ({ page }) => {
+  await page.goto("/e2e-test");
   const img = page.locator("img[src*='s3']").first();
   await img.waitFor({ state: "visible", timeout: 15000 });
   await img.click();
