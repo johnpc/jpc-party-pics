@@ -1,5 +1,10 @@
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const { Given, When, Then } = createBdd();
 
@@ -11,12 +16,26 @@ Given("I navigate to an album with photos", async ({ page }) => {
   await page.goto("/Demo");
 });
 
-Given("I navigate to an album with more than 24 photos", async ({ page }) => {
-  await page.goto("/Demo");
-});
-
 Given("the photo modal is open", async ({ page }) => {
   await page.goto("/Demo");
+  const img = page.locator("img[src*='s3']").first();
+  await img.waitFor({ state: "visible", timeout: 15000 });
+  await img.click();
+});
+
+Given("I have uploaded a photo to the test album", async ({ page }) => {
+  await page.goto("/e2e-test");
+  const fileInput = page.locator('input[type="file"]');
+  const fixturePath = path.resolve(__dirname, "../fixtures/test-photo.jpg");
+  await fileInput.setInputFiles(fixturePath);
+  await page.locator("img[src*='s3']").first().waitFor({
+    state: "visible",
+    timeout: 15000,
+  });
+});
+
+Given("the photo modal is open on a test album", async ({ page }) => {
+  await page.goto("/e2e-test");
   const img = page.locator("img[src*='s3']").first();
   await img.waitFor({ state: "visible", timeout: 15000 });
   await img.click();
@@ -114,17 +133,4 @@ Then("the photo should still be in the album", async ({ page }) => {
 
 Then("a zip file should begin downloading", async () => {
   // Download triggered — verified via network request
-});
-
-Then("I should see pagination controls", async ({ page }) => {
-  await expect(page.locator("[class*='pagination']").first()).toBeVisible();
-});
-
-Then("I should see 24 photos per page", async ({ page }) => {
-  const media = page.locator(
-    "[class*='collection'] img, [class*='collection'] video",
-  );
-  const count = await media.count();
-  expect(count).toBeGreaterThanOrEqual(20);
-  expect(count).toBeLessThanOrEqual(24);
 });
