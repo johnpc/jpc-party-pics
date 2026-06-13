@@ -78,6 +78,14 @@ export function useUploadQueue(albumName: string) {
 
   processNextRef.current = processNext;
 
+  useEffect(() => {
+    const handleOnline = () => {
+      processNextRef.current?.();
+    };
+    window.addEventListener("online", handleOnline);
+    return () => window.removeEventListener("online", handleOnline);
+  }, []);
+
   const addFiles = useCallback(
     async (files: FileList | File[]) => {
       for (const file of Array.from(files)) {

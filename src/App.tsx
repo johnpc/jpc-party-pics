@@ -7,6 +7,7 @@ import { PartyPicsAlbum } from "./components/PartyPicsAlbum/PartyPicsAlbum";
 import { CreateAlbum } from "./components/CreateAlbum";
 import { Header } from "./components/Header";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { OfflineBanner } from "./components/OfflineBanner";
 import { Divider, Loader, useTheme } from "@aws-amplify/ui-react";
 
 const Camera = lazy(() =>
@@ -27,6 +28,7 @@ function App() {
 
   return (
     <>
+      <OfflineBanner />
       <Header />
       <Divider
         style={{ visibility: "hidden" }}
