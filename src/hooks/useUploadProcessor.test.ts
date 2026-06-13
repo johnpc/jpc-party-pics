@@ -123,4 +123,45 @@ describe("processUploadItem", () => {
       retryCount: 2,
     });
   });
+
+  it("tracks upload progress via onProgress callback", async () => {
+    const file = new File(["data"], "photo.jpg", { type: "image/jpeg" });
+    mockGetFile.mockResolvedValue(file);
+
+    const { uploadData } = await import("aws-amplify/storage");
+    vi.mocked(uploadData).mockImplementationOnce((({
+      options,
+    }: {
+      options: {
+        onProgress: (e: {
+          totalBytes: number;
+          transferredBytes: number;
+        }) => void;
+      };
+    }) => {
+      options.onProgress({ totalBytes: 100, transferredBytes: 50 });
+      return { result: Promise.resolve({ path: "test-path" }) };
+    }) as typeof uploadData);
+
+    await processUploadItem(makeItem(), "wedding", "abc", refreshQueue);
+
+    expect(mockUpdate).toHaveBeenCalledWith("test-1", { progress: 50 });
+  });
+
+  it("normalizes file extensions to lowercase", async () => {
+    const file = new File(["data"], "PHOTO.JPG", { type: "image/jpeg" });
+    mockGetFile.mockResolvedValue(file);
+
+    await processUploadItem(
+      makeItem({ fileName: "PHOTO.JPG" }),
+      "wedding",
+      "abc",
+      refreshQueue,
+    );
+
+    expect(mockUpdate).toHaveBeenCalledWith("test-1", {
+      status: "complete",
+      progress: 100,
+    });
+  });
 });

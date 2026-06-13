@@ -5,20 +5,24 @@ import { detectFileType } from "../../../helpers/detectFileType";
 import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
 import { canPlayVideoFile } from "../../../helpers/videoSupport";
 import { VideoFallback } from "./VideoFallback";
+import { useInView } from "../../../hooks/useInView";
 
 export const SharedImage = (props: {
   image: Schema["Image"]["type"];
   handleOpenModal: (image: Schema["Image"]["type"]) => void;
 }) => {
   const { tokens } = useTheme();
+  const { ref, inView } = useInView("300px");
   const [url, setUrl] = useState<URL>();
+
   useEffect(() => {
+    if (!inView) return;
     const fetchUrl = async () => {
-      const url = await getAccelerateUrl(props.image.key);
-      setUrl(url);
+      const resolved = await getAccelerateUrl(props.image.key);
+      setUrl(resolved);
     };
     fetchUrl();
-  }, [props.image.key]);
+  }, [inView, props.image.key]);
 
   const fileType = detectFileType(props.image.key);
   const isUnsupportedVideo =
@@ -62,18 +66,20 @@ export const SharedImage = (props: {
   );
 
   return (
-    <Card
-      borderRadius="large"
-      variation="elevated"
-      backgroundColor={"white"}
-      borderColor={"white"}
-      boxShadow={"none"}
-      width="100%"
-      textAlign={"center"}
-      padding={tokens.space.xxxs}
-      overflow="hidden"
-    >
-      {url ? imageComponent : <Loader size="large" />}
-    </Card>
+    <div ref={ref as React.RefObject<HTMLDivElement>}>
+      <Card
+        borderRadius="large"
+        variation="elevated"
+        backgroundColor={"white"}
+        borderColor={"white"}
+        boxShadow={"none"}
+        width="100%"
+        textAlign={"center"}
+        padding={tokens.space.xxxs}
+        overflow="hidden"
+      >
+        {url ? imageComponent : <Loader size="large" />}
+      </Card>
+    </div>
   );
 };

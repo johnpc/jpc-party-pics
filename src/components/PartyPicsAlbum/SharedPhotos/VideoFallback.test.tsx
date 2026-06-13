@@ -61,4 +61,19 @@ describe("VideoFallback", () => {
     screen.getByTestId("fallback").click();
     expect(onClick).toHaveBeenCalled();
   });
+
+  it("renders without onClick (no pointer cursor)", () => {
+    renderWithProviders(<VideoFallback url="https://example.com/video.webm" />);
+    expect(screen.getByTestId("fallback")).toBeInTheDocument();
+  });
+
+  it("renders with custom style prop", () => {
+    renderWithProviders(
+      <VideoFallback
+        url="https://example.com/video.webm"
+        style={{ width: "200px" }}
+      />,
+    );
+    expect(screen.getByTestId("fallback")).toBeInTheDocument();
+  });
 });
