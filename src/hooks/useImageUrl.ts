@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { getAccelerateUrl } from "../helpers/getAccelerateUrl";
 import { getThumbnailUrl } from "../helpers/getThumbnailUrl";
 import { detectFileType } from "../helpers/detectFileType";
@@ -38,4 +39,29 @@ export function useImageUrl(
     gcTime: STALE_TIME,
   });
   return data;
+}
+
+export function usePrefetchAdjacentImages(
+  keys: string[],
+  currentKey: string | undefined,
+) {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!currentKey) return;
+    const index = keys.findIndex((k) => k === currentKey);
+    if (index === -1) return;
+
+    const prevIndex = index === 0 ? keys.length - 1 : index - 1;
+    const nextIndex = index === keys.length - 1 ? 0 : index + 1;
+    const adjacentKeys = [keys[prevIndex], keys[nextIndex]];
+
+    for (const key of adjacentKeys) {
+      queryClient.prefetchQuery({
+        queryKey: ["imageUrl", "full", key],
+        queryFn: () => fetchFullUrl(key),
+        staleTime: STALE_TIME,
+      });
+    }
+  }, [currentKey, keys, queryClient]);
 }
