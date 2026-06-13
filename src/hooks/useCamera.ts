@@ -38,7 +38,7 @@ export function useCamera(albumName: string) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment" },
-        audio: mode === "video",
+        audio: true,
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -116,6 +116,14 @@ export function useCamera(albumName: string) {
 
     mediaRecorder.onstop = async () => {
       const blob = new Blob(chunksRef.current, { type: mimeType });
+
+      const MIN_VIDEO_SIZE = 50_000;
+      if (blob.size < MIN_VIDEO_SIZE) {
+        console.warn(`Recording too short (${blob.size} bytes), discarding`);
+        setStatus("idle");
+        return;
+      }
+
       setStatus("uploading");
 
       try {
@@ -139,12 +147,14 @@ export function useCamera(albumName: string) {
       }
     };
 
-    mediaRecorder.start();
+    mediaRecorder.start(1000);
     setRecording(true);
   };
 
   const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
+    const recorder = mediaRecorderRef.current;
+    if (!recorder || recorder.state !== "recording") return;
+    recorder.stop();
     setRecording(false);
   };
 
