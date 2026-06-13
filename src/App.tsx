@@ -6,6 +6,7 @@ import config from "../amplify_outputs.json";
 import { PartyPicsAlbum } from "./components/PartyPicsAlbum/PartyPicsAlbum";
 import { CreateAlbum } from "./components/CreateAlbum";
 import { Header } from "./components/Header";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Divider, Loader, useTheme } from "@aws-amplify/ui-react";
 
 const Camera = lazy(() =>
@@ -32,19 +33,21 @@ function App() {
         marginTop={tokens.space.small}
         marginBottom={tokens.space.small}
       />
-      {!albumName ? (
-        <CreateAlbum />
-      ) : isCamera ? (
-        <Suspense fallback={<Loader variation="linear" />}>
-          <Camera albumName={albumName} />
-        </Suspense>
-      ) : isKiosk ? (
-        <Suspense fallback={<Loader variation="linear" />}>
-          <Kiosk albumName={albumName} />
-        </Suspense>
-      ) : (
-        <PartyPicsAlbum albumName={albumName} />
-      )}
+      <ErrorBoundary>
+        {!albumName ? (
+          <CreateAlbum />
+        ) : isCamera ? (
+          <Suspense fallback={<Loader variation="linear" />}>
+            <Camera albumName={albumName} />
+          </Suspense>
+        ) : isKiosk ? (
+          <Suspense fallback={<Loader variation="linear" />}>
+            <Kiosk albumName={albumName} />
+          </Suspense>
+        ) : (
+          <PartyPicsAlbum albumName={albumName} />
+        )}
+      </ErrorBoundary>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   uploadPhoto,
   uploadVideo,
@@ -94,12 +94,15 @@ export function useCamera(albumName: string) {
 
   const uploadImage = useUploadImage(albumName);
 
-  const ctx: UploadContext = {
-    albumName,
-    hash,
-    register: uploadImage.mutateAsync,
-    setStatus,
-  };
+  const ctx = useMemo<UploadContext>(
+    () => ({
+      albumName,
+      hash,
+      register: uploadImage.mutateAsync,
+      setStatus,
+    }),
+    [albumName, hash, uploadImage.mutateAsync],
+  );
 
   const capturePhoto = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return;

@@ -4,7 +4,17 @@ import { renderWithProviders } from "../../../test/test-utils";
 import { SharedImage } from "./SharedImage";
 
 vi.mock("@aws-amplify/ui-react", () => ({
-  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Card: ({
+    children,
+    ref,
+  }: {
+    children: React.ReactNode;
+    ref?: React.Ref<HTMLDivElement>;
+  }) => (
+    <div ref={ref} data-testid="card">
+      {children}
+    </div>
+  ),
   Image: ({
     alt,
     src,
@@ -23,8 +33,9 @@ vi.mock("@aws-amplify/ui-react", () => ({
   }),
 }));
 
+const mockDetectFileType = vi.fn().mockReturnValue("image");
 vi.mock("../../../helpers/detectFileType", () => ({
-  detectFileType: (key: string) => (key.endsWith(".mp4") ? "video" : "image"),
+  detectFileType: (...args: unknown[]) => mockDetectFileType(...args),
 }));
 
 vi.mock("../../../helpers/getAccelerateUrl", () => ({
@@ -37,12 +48,26 @@ vi.mock("../../../helpers/isMobileScreenSize", () => ({
   isMobileScreenSize: false,
 }));
 
+const mockCanPlay = vi.fn().mockReturnValue(true);
 vi.mock("../../../helpers/videoSupport", () => ({
-  canPlayVideoFile: () => true,
+  canPlayVideoFile: (...args: unknown[]) => mockCanPlay(...args),
+}));
+
+vi.mock("../../../hooks/useInView", () => ({
+  useInView: () => ({ ref: { current: null }, inView: true }),
+}));
+
+vi.mock("./VideoFallback", () => ({
+  VideoFallback: ({ url }: { url?: string }) => (
+    <div data-testid="video-fallback">
+      {url ? "Download to view" : "Video unavailable"}
+    </div>
+  ),
 }));
 
 describe("SharedImage", () => {
   it("renders an image once URL resolves", async () => {
+    mockDetectFileType.mockReturnValue("image");
     renderWithProviders(
       <SharedImage
         image={{ key: "photo.jpg", date: "2024-01-01", size: 100 }}
@@ -56,6 +81,7 @@ describe("SharedImage", () => {
   });
 
   it("calls handleOpenModal when clicked", async () => {
+    mockDetectFileType.mockReturnValue("image");
     const handleOpenModal = vi.fn();
     const image = { key: "photo.jpg", date: "2024-01-01", size: 100 };
 
@@ -69,5 +95,49 @@ describe("SharedImage", () => {
 
     screen.getByAltText("photo.jpg").click();
     expect(handleOpenModal).toHaveBeenCalledWith(image);
+  });
+
+  it("renders video element for supported video files", async () => {
+    mockDetectFileType.mockReturnValue("video");
+    mockCanPlay.mockReturnValue(true);
+
+    const { container } = renderWithProviders(
+      <SharedImage
+        image={{ key: "clip.mp4", date: "2024-01-01", size: 5000 }}
+        handleOpenModal={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(container.querySelector("video")).toBeTruthy();
+    });
+  });
+
+  it("renders VideoFallback for unsupported video formats", async () => {
+    mockDetectFileType.mockReturnValue("video");
+    mockCanPlay.mockReturnValue(false);
+
+    renderWithProviders(
+      <SharedImage
+        image={{ key: "clip.webm", date: "2024-01-01", size: 5000 }}
+        handleOpenModal={vi.fn()}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("Download to view")).toBeInTheDocument();
+    });
+  });
+
+  it("shows loader before URL resolves", () => {
+    mockDetectFileType.mockReturnValue("image");
+    renderWithProviders(
+      <SharedImage
+        image={{ key: "photo.jpg", date: "2024-01-01", size: 100 }}
+        handleOpenModal={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId("loader")).toBeInTheDocument();
   });
 });
