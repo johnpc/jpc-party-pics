@@ -2,19 +2,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { getAccelerateUrl } from "../helpers/getAccelerateUrl";
 import { getThumbnailUrl } from "../helpers/getThumbnailUrl";
-import { detectFileType } from "../helpers/detectFileType";
 
 const STALE_TIME = 50 * 60 * 1000; // 50 minutes (URLs expire in 60)
 
 async function fetchThumbnailOrFull(key: string): Promise<string> {
-  const fileType = detectFileType(key);
-  if (fileType === "image") {
-    try {
-      const thumbUrl = await getThumbnailUrl(key);
-      return thumbUrl.toString();
-    } catch {
-      // Thumbnail not yet generated, fall back to full-size
-    }
+  try {
+    const thumbUrl = await getThumbnailUrl(key);
+    return thumbUrl.toString();
+  } catch {
+    // Thumbnail not yet generated, fall back to full-size
   }
   const url = await getAccelerateUrl(key);
   return url.toString();
