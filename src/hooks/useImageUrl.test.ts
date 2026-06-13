@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useImageUrl } from "./useImageUrl";
+import { useImageUrl, usePrefetchAdjacentImages } from "./useImageUrl";
 import { createWrapper } from "../test/test-utils";
 
 vi.mock("../helpers/getThumbnailUrl", () => ({
@@ -83,6 +83,54 @@ describe("useImageUrl", () => {
 
     await waitFor(() => {
       expect(result.current).toBe("https://example.com/full.jpg");
+    });
+  });
+});
+
+describe("usePrefetchAdjacentImages", () => {
+  it("does nothing when currentKey is undefined", async () => {
+    const { getAccelerateUrl } = await import("../helpers/getAccelerateUrl");
+    vi.mocked(getAccelerateUrl).mockClear();
+
+    renderHook(
+      () => usePrefetchAdjacentImages(["a.jpg", "b.jpg", "c.jpg"], undefined),
+      { wrapper: createWrapper() },
+    );
+
+    expect(getAccelerateUrl).not.toHaveBeenCalled();
+  });
+
+  it("prefetches adjacent image URLs", async () => {
+    const { getAccelerateUrl } = await import("../helpers/getAccelerateUrl");
+    vi.mocked(getAccelerateUrl).mockResolvedValue(
+      new URL("https://example.com/img.jpg"),
+    );
+
+    const keys = ["a.jpg", "b.jpg", "c.jpg"];
+    renderHook(() => usePrefetchAdjacentImages(keys, "b.jpg"), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(getAccelerateUrl).toHaveBeenCalledWith("a.jpg");
+      expect(getAccelerateUrl).toHaveBeenCalledWith("c.jpg");
+    });
+  });
+
+  it("wraps around at boundaries", async () => {
+    const { getAccelerateUrl } = await import("../helpers/getAccelerateUrl");
+    vi.mocked(getAccelerateUrl).mockResolvedValue(
+      new URL("https://example.com/img.jpg"),
+    );
+
+    const keys = ["a.jpg", "b.jpg", "c.jpg"];
+    renderHook(() => usePrefetchAdjacentImages(keys, "a.jpg"), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(getAccelerateUrl).toHaveBeenCalledWith("c.jpg");
+      expect(getAccelerateUrl).toHaveBeenCalledWith("b.jpg");
     });
   });
 });

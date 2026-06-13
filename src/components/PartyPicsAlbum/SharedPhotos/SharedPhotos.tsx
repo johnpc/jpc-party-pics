@@ -12,12 +12,15 @@ import { PhotoModal } from "./PhotoModal";
 import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
 import { humanFileSize } from "../../../helpers/humanFileSize";
 import { usePhotoGallery } from "../../../hooks/usePhotoGallery";
+import { usePrefetchAdjacentImages } from "../../../hooks/useImageUrl";
 
 const itemsPerPage = 24;
 
 export const SharedPhotos = (props: { albumName: string }) => {
   const { tokens } = useTheme();
   const gallery = usePhotoGallery(props.albumName, custom.zipFileEndpoint);
+  const imageKeys = gallery.images.map((img) => img.key);
+  usePrefetchAdjacentImages(imageKeys, gallery.openModalImage?.key);
 
   return (
     <>
