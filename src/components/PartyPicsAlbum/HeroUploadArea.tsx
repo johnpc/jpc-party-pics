@@ -70,15 +70,16 @@ function FilePickerButton(props: {
     <label
       style={{
         position: "relative",
-        display: "inline-block",
-        overflow: "hidden",
-        cursor: "pointer",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
         backgroundColor: "white",
         color: "#764ba2",
         fontWeight: "bold",
         padding: props.padding,
         borderRadius: "4px",
         fontSize: isMobileScreenSize ? "16px" : "14px",
+        cursor: "pointer",
       }}
     >
       📁 Choose Files
@@ -95,6 +96,8 @@ function FilePickerButton(props: {
         style={{
           position: "absolute",
           inset: 0,
+          width: "100%",
+          height: "100%",
           opacity: 0,
           cursor: "pointer",
         }}
