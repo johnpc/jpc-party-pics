@@ -90,6 +90,24 @@ describe("processUploadItem", () => {
     });
   });
 
+  it("rejects video files smaller than 50KB", async () => {
+    const tinyVideo = new File(["x"], "clip.mp4", { type: "video/mp4" });
+    mockGetFile.mockResolvedValue(tinyVideo);
+
+    await processUploadItem(
+      makeItem({ fileName: "clip.mp4", fileType: "video/mp4" }),
+      "wedding",
+      "abc",
+      refreshQueue,
+    );
+
+    expect(mockUpdate).toHaveBeenCalledWith("test-1", {
+      status: "error",
+      error: "Video too short to upload",
+      retryCount: 1,
+    });
+  });
+
   it("increments retry count on error", async () => {
     mockGetFile.mockRejectedValue(new Error("Network error"));
     await processUploadItem(
