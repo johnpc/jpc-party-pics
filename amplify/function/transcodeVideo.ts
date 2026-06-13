@@ -9,7 +9,7 @@ import { writeFileSync, readFileSync, mkdirSync } from "fs";
 import { S3Event } from "aws-lambda";
 
 const s3 = new S3Client();
-const NON_MP4_EXTENSIONS = [".webm", ".mkv", ".avi", ".wmv", ".flv"];
+const NON_MP4_EXTENSIONS = [".webm", ".mkv", ".avi", ".wmv", ".flv", ".mov"];
 
 export const handler = async (event: S3Event): Promise<void> => {
   for (const record of event.Records) {
