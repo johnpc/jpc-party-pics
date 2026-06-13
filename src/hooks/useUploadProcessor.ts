@@ -11,6 +11,12 @@ import { getFileFromCache } from "../helpers/fileCache";
 
 const client = generateClient<Schema>();
 
+function normalizeExtension(fileName: string): string {
+  const dotIdx = fileName.lastIndexOf(".");
+  if (dotIdx === -1) return fileName;
+  return fileName.slice(0, dotIdx) + fileName.slice(dotIdx).toLowerCase();
+}
+
 export async function processUploadItem(
   item: QueuedUpload,
   albumName: string,
@@ -29,7 +35,8 @@ export async function processUploadItem(
       return;
     }
 
-    const key = `public/${albumName}/${hash}/${item.id}-${item.fileName}`;
+    const normalizedName = normalizeExtension(item.fileName);
+    const key = `public/${albumName}/${hash}/${item.id}-${normalizedName}`;
     const compressed = await compressMedia({ file, key });
 
     await markUploading(item.id, refreshQueue);
