@@ -41,17 +41,17 @@ When("I click outside the modal", async ({ page }) => {
 });
 
 When("I click the download button", async ({ page }) => {
-  await page.getByRole("button", { name: /download/ }).click();
+  await page.getByRole("button", { name: /Download/ }).click();
 });
 
 When("I confirm and delete the photo", async ({ page }) => {
   page.once("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: /Delete photo/ }).click();
+  await page.getByRole("button", { name: /Delete/ }).click();
 });
 
 When("I dismiss and click delete", async ({ page }) => {
   page.once("dialog", (dialog) => dialog.dismiss());
-  await page.getByRole("button", { name: /Delete photo/ }).click();
+  await page.getByRole("button", { name: /Delete/ }).click();
 });
 
 When("I confirm and click download all", async ({ page }) => {
@@ -81,13 +81,11 @@ Then("I should see navigation arrows", async ({ page }) => {
 });
 
 Then("I should see a download button", async ({ page }) => {
-  await expect(page.getByRole("button", { name: /download/ })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Download/ })).toBeVisible();
 });
 
 Then("I should see a delete button", async ({ page }) => {
-  await expect(
-    page.getByRole("button", { name: /Delete photo/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Delete/ })).toBeVisible();
 });
 
 Then("I should see the next photo", async () => {

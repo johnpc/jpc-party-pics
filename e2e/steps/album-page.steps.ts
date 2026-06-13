@@ -15,16 +15,9 @@ Then("I should see a QR code", async ({ page }) => {
   await expect(page.locator("svg").first()).toBeVisible();
 });
 
-Then("I should see the file uploader", async ({ page }) => {
-  await expect(
-    page.locator("[class*='uploader'], [data-testid*='uploader']").first(),
-  ).toBeVisible();
-});
-
-Then("the uploader should accept images and videos", async ({ page }) => {
-  await expect(
-    page.locator("[class*='uploader'], [data-testid*='uploader']").first(),
-  ).toBeVisible();
+Then("I should see the upload hero area", async ({ page }) => {
+  await expect(page.getByText("Add your photos & videos")).toBeVisible();
+  await expect(page.getByText("Choose Files")).toBeVisible();
 });
 
 Then("I should see a button {string}", async ({ page }, text: string) => {

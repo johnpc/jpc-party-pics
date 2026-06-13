@@ -1,7 +1,6 @@
 import {
   Button,
   Collection,
-  Divider,
   Heading,
   Loader,
   Text,
@@ -30,22 +29,20 @@ export const SharedPhotos = (props: { albumName: string }) => {
         onDownload={gallery.downloadFile}
         onDelete={gallery.deleteFile}
       />
-      <Text fontSize={"large"}>Photos shared to album "{props.albumName}"</Text>
-      <Divider
-        marginTop={tokens.space.medium}
-        marginBottom={tokens.space.medium}
-        style={{ visibility: "hidden" }}
-      />
+      {!isMobileScreenSize && (
+        <Text fontSize="large" marginBottom={tokens.space.medium}>
+          Photos shared to album &quot;{props.albumName}&quot;
+        </Text>
+      )}
       <Collection
         items={gallery.images}
         key={gallery.images.length.toFixed()}
         type="list"
         direction="row"
-        gap={tokens.space.medium}
-        paddingLeft={tokens.space.medium}
-        textAlign={"center"}
+        gap={isMobileScreenSize ? tokens.space.small : tokens.space.medium}
+        textAlign="center"
         wrap="wrap"
-        width={"100%"}
+        width="100%"
         isPaginated={gallery.images.length > itemsPerPage}
         itemsPerPage={itemsPerPage}
         searchNoResultsFound={
@@ -69,8 +66,9 @@ export const SharedPhotos = (props: { albumName: string }) => {
       <Button
         variation="primary"
         marginTop={tokens.space.medium}
-        marginBottom={tokens.space.medium}
+        marginBottom={tokens.space.large}
         isFullWidth={isMobileScreenSize}
+        className="download-all-btn"
         padding={tokens.space.medium}
         onClick={gallery.downloadAll}
       >

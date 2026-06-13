@@ -5,6 +5,12 @@
   text-align: center;
 }
 
+@media (max-width: 768px) {
+  #root {
+    padding: 0.75rem;
+  }
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -39,4 +45,27 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.amplify-collection-pagination,
+.amplify-pagination,
+.amplify-flex {
+  justify-content: center;
+}
+
+.amplify-collection-items {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 999px) {
+  .amplify-collection-items {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .download-all-btn {
+    width: 100% !important;
+  }
 }

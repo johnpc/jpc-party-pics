@@ -4,7 +4,17 @@ import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
 import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
 import { canPlayVideoFile } from "../../../helpers/videoSupport";
+import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
 import { VideoFallback } from "./VideoFallback";
+
+const mediaStyle = isMobileScreenSize
+  ? { width: "100%", maxHeight: "70vh", objectFit: "contain" as const }
+  : {
+      width: "80%",
+      maxHeight: "50vh",
+      objectFit: "contain" as const,
+      verticalAlign: "middle" as const,
+    };
 
 export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
   const { tokens } = useTheme();
@@ -33,27 +43,13 @@ export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
   return fileType === "image" ? (
     <Image
       src={url?.toString()}
-      style={{
-        borderRadius: tokens.radii.large.value,
-        width: "80%",
-        height: "80%",
-        maxHeight: "50vh",
-        objectFit: "contain",
-        verticalAlign: "middle",
-      }}
+      style={{ borderRadius: tokens.radii.large.value, ...mediaStyle }}
       key={props.image.key}
       alt={props.image.key}
     />
   ) : (
     <video
-      style={{
-        borderRadius: tokens.radii.large.value,
-        width: "80%",
-        height: "80%",
-        maxHeight: "50vh",
-        objectFit: "contain",
-        verticalAlign: "middle",
-      }}
+      style={{ borderRadius: tokens.radii.large.value, ...mediaStyle }}
       controls={true}
       key={props.image.key}
       preload="auto"

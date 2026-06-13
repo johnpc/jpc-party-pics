@@ -1,4 +1,4 @@
-import { Button, Card, Text, useTheme } from "@aws-amplify/ui-react";
+import { Button, Flex, Text, useTheme } from "@aws-amplify/ui-react";
 import { Modal } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
@@ -17,8 +17,6 @@ interface PhotoModalProps {
   onDownload: (key: string) => void;
   onDelete: (key: string) => void;
 }
-
-const arrowSize = isMobileScreenSize ? "medium" : "large";
 
 export const PhotoModal = ({
   image,
@@ -39,28 +37,106 @@ export const PhotoModal = ({
 
   return (
     <Modal open onClose={onClose}>
-      <Card
+      <Flex
         onKeyUpCapture={handleKeyUp}
-        textAlign="center"
-        margin={tokens.space.large}
-        style={{ verticalAlign: "middle" }}
+        direction="column"
+        alignItems="center"
+        justifyContent="space-between"
+        style={
+          isMobileScreenSize
+            ? {
+                position: "fixed",
+                inset: 0,
+                backgroundColor: "rgba(0,0,0,0.95)",
+                outline: "none",
+              }
+            : {
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "white",
+                borderRadius: tokens.radii.large.value,
+                padding: tokens.space.medium.value,
+                maxWidth: "90vw",
+                maxHeight: "90vh",
+                outline: "none",
+              }
+        }
       >
-        <Text>
-          <Text as="span" onClick={() => onBack(image)}>
-            <ArrowBackIosIcon fontSize={arrowSize} />
-          </Text>
-          <ModalImage key={image.key} image={image} />
-          <Text as="span" onClick={() => onForward(image)}>
-            <ArrowForwardIosIcon fontSize={arrowSize} />
-          </Text>
+        <Flex
+          justifyContent="flex-end"
+          width="100%"
+          padding={tokens.space.small}
+        >
           <Button
-            display="inline"
-            variation="link"
-            isFullWidth
-            padding={tokens.space.medium}
-            onClick={() => onDownload(image.key)}
+            size="small"
+            onClick={onClose}
+            style={
+              isMobileScreenSize
+                ? { color: "white", borderColor: "rgba(255,255,255,0.3)" }
+                : undefined
+            }
           >
-            download ({humanFileSize(image.size)})
+            ✕
+          </Button>
+        </Flex>
+
+        <Flex
+          alignItems="center"
+          justifyContent="center"
+          flex="1"
+          width="100%"
+          gap={tokens.space.xs}
+        >
+          <Text
+            as="span"
+            onClick={() => onBack(image)}
+            style={{
+              cursor: "pointer",
+              padding: "1rem 0.5rem",
+              color: isMobileScreenSize ? "white" : undefined,
+            }}
+          >
+            <ArrowBackIosIcon
+              fontSize={isMobileScreenSize ? "large" : "medium"}
+            />
+          </Text>
+
+          <ModalImage key={image.key} image={image} />
+
+          <Text
+            as="span"
+            onClick={() => onForward(image)}
+            style={{
+              cursor: "pointer",
+              padding: "1rem 0.5rem",
+              color: isMobileScreenSize ? "white" : undefined,
+            }}
+          >
+            <ArrowForwardIosIcon
+              fontSize={isMobileScreenSize ? "large" : "medium"}
+            />
+          </Text>
+        </Flex>
+
+        <Flex
+          gap={tokens.space.medium}
+          padding={tokens.space.small}
+          justifyContent="center"
+          style={
+            isMobileScreenSize
+              ? { paddingBottom: "env(safe-area-inset-bottom, 16px)" }
+              : undefined
+          }
+        >
+          <Button
+            variation="link"
+            size="small"
+            onClick={() => onDownload(image.key)}
+            style={isMobileScreenSize ? { color: "white" } : undefined}
+          >
+            ↓ Download ({humanFileSize(image.size)})
           </Button>
           <Button
             size="small"
@@ -68,10 +144,10 @@ export const PhotoModal = ({
             colorTheme="warning"
             onClick={() => onDelete(image.key)}
           >
-            Delete photo
+            Delete
           </Button>
-        </Text>
-      </Card>
+        </Flex>
+      </Flex>
     </Modal>
   );
 };

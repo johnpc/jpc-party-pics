@@ -1,101 +1,99 @@
-import { FileUploader } from "@aws-amplify/ui-react-storage";
 import QRCode from "react-qr-code";
 import {
-  Divider,
+  Button,
   Flex,
-  Grid,
+  Heading,
   Text,
   useTheme,
   View,
 } from "@aws-amplify/ui-react";
 import { CopyLink } from "./CopyLink";
-import { CameraButton } from "./CameraButton";
 import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
 import { useState } from "react";
-import { useUploadImage } from "../../hooks/useImages";
-import { compressMedia } from "../../helpers/compressMedia";
-
-const makeHash = (length: number): string => {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
-};
-
-const qrSize = 256;
+import { useUploadQueue } from "../../hooks/useUploadQueue";
+import { UploadProgress } from "./UploadProgress";
+import { HeroUploadArea } from "./HeroUploadArea";
 
 export const PartyPicsAlbum = (props: { albumName: string }) => {
   const { tokens } = useTheme();
-  const [hash] = useState(makeHash(5));
-  const uploadImage = useUploadImage(props.albumName);
+  const [showShare, setShowShare] = useState(false);
+  const uploadQueue = useUploadQueue(props.albumName);
 
-  let path = window.location.pathname;
-  if (path.endsWith("/")) {
-    path = path.slice(0, -1);
-  }
-
-  const onSuccess = async (event: { key?: string | undefined }) => {
-    if (event.key) {
-      await uploadImage.mutateAsync(event.key);
-    }
-  };
+  const albumUrl = window.location.href;
+  const kioskUrl = `${window.location.origin}/${props.albumName}/kiosk`;
 
   return (
     <>
-      <Grid
-        columnGap="0.5rem"
-        rowGap="0.5rem"
-        templateColumns="1fr 1fr 1fr"
-        templateRows="1fr"
+      <Flex
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom={tokens.space.small}
       >
-        <View columnStart="1" columnEnd="2">
-          <QRCode
-            size={qrSize}
-            style={{ height: "auto", maxWidth: "100%" }}
-            value={window.location.href}
-            viewBox={`0 0 ${qrSize} ${qrSize}`}
-          />
-          <Text fontSize={tokens.fontSizes.small}>
-            Share this album link via QR code or copy/paste
+        <Flex alignItems="baseline" gap={tokens.space.xs}>
+          <Text fontSize={tokens.fontSizes.small} color="gray">
+            Album:
           </Text>
-        </View>
-        <View columnStart="2" columnEnd="-1">
-          <CameraButton albumName={props.albumName} />
-          <Divider
-            label="OR"
-            marginTop={tokens.space.small}
-            marginBottom={tokens.space.small}
-          />
-          <FileUploader
-            acceptedFileTypes={["image/*", "video/*"]}
-            path={`public/${props.albumName}/${hash}`}
-            maxFileCount={1000}
-            isResumable
-            useAccelerateEndpoint
-            onUploadSuccess={onSuccess}
-            processFile={compressMedia}
-          />
-        </View>
-      </Grid>
-      <Flex gap={tokens.space.small} wrap="wrap" justifyContent="center">
-        <CopyLink link={window.location.href} />
-        <CopyLink
-          link={`${window.location.origin}/${props.albumName}/kiosk`}
-          label="Copy Kiosk Link"
-          variation="link"
-        />
+          <Heading level={4}>{props.albumName}</Heading>
+        </Flex>
+        <Button
+          size="small"
+          onClick={() => setShowShare(!showShare)}
+          colorTheme={showShare ? "success" : undefined}
+        >
+          🔗 Share
+        </Button>
       </Flex>
-      <Divider
-        marginTop={tokens.space.medium}
-        marginBottom={tokens.space.medium}
+
+      {showShare && <SharePanel albumUrl={albumUrl} kioskUrl={kioskUrl} />}
+
+      <HeroUploadArea
+        onFilesSelected={(files) => uploadQueue.addFiles(files)}
+        onTapCamera={() =>
+          (window.location.href = `/${props.albumName}/camera`)
+        }
+        isUploading={uploadQueue.isUploading}
+        activeCount={uploadQueue.activeCount}
+        errorCount={uploadQueue.errorCount}
+        onRetry={uploadQueue.retryFailed}
       />
+
+      <UploadProgress queue={uploadQueue.queue} />
+
       <SharedPhotos albumName={props.albumName} />
     </>
   );
 };
+
+function SharePanel(props: { albumUrl: string; kioskUrl: string }) {
+  const { tokens } = useTheme();
+
+  return (
+    <View
+      padding={tokens.space.medium}
+      backgroundColor="white"
+      borderRadius="large"
+      marginBottom={tokens.space.medium}
+      textAlign="center"
+    >
+      <QRCode
+        size={200}
+        style={{ height: "auto", maxWidth: "100%", margin: "0 auto" }}
+        value={props.albumUrl}
+        viewBox="0 0 200 200"
+      />
+      <Flex
+        justifyContent="center"
+        gap={tokens.space.small}
+        marginTop={tokens.space.medium}
+        wrap="wrap"
+      >
+        <CopyLink link={props.albumUrl} />
+        <CopyLink
+          link={props.kioskUrl}
+          label="Copy Kiosk Link"
+          variation="link"
+        />
+      </Flex>
+    </View>
+  );
+}

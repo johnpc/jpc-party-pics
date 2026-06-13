@@ -1,4 +1,5 @@
 import "@aws-amplify/ui-react/styles.css";
+import "./App.css";
 import { Amplify } from "aws-amplify";
 import config from "../amplify_outputs.json";
 import { PartyPicsAlbum } from "./components/PartyPicsAlbum/PartyPicsAlbum";

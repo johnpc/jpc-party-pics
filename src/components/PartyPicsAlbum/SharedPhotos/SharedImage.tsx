@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
 import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
 import { canPlayVideoFile } from "../../../helpers/videoSupport";
-import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
 import { VideoFallback } from "./VideoFallback";
 
 export const SharedImage = (props: {
@@ -25,21 +24,23 @@ export const SharedImage = (props: {
   const isUnsupportedVideo =
     fileType === "video" && !canPlayVideoFile(props.image.key);
 
+  const mediaStyle = {
+    borderRadius: tokens.radii.large.value,
+    width: "100%",
+    aspectRatio: "1",
+    objectFit: "cover" as const,
+  };
+
   const imageComponent = isUnsupportedVideo ? (
     <VideoFallback
       url={url?.toString()}
       onClick={() => props.handleOpenModal(props.image)}
-      style={{ maxHeight: "30vh" }}
+      style={mediaStyle}
     />
   ) : fileType === "image" ? (
     <Image
       src={url?.toString()}
-      style={{
-        borderRadius: tokens.radii.large.value,
-        height: "100%",
-        maxHeight: "30vh",
-        objectFit: "cover",
-      }}
+      style={mediaStyle}
       key={props.image.key}
       alt={props.image.key}
       onClick={() => props.handleOpenModal(props.image)}
@@ -48,12 +49,7 @@ export const SharedImage = (props: {
   ) : (
     <video
       onClick={() => props.handleOpenModal(props.image)}
-      style={{
-        borderRadius: tokens.radii.large.value,
-        width: "100%",
-        maxHeight: "30vh",
-        objectFit: "cover",
-      }}
+      style={mediaStyle}
       controls={true}
       key={props.image.key}
       preload="metadata"
@@ -72,7 +68,7 @@ export const SharedImage = (props: {
       backgroundColor={"white"}
       borderColor={"white"}
       boxShadow={"none"}
-      width={isMobileScreenSize ? "45%" : undefined}
+      width="100%"
       textAlign={"center"}
       padding={tokens.space.xxxs}
       overflow="hidden"

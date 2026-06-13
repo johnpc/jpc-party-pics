@@ -1,6 +1,19 @@
 import "@testing-library/jest-dom/vitest";
+import "fake-indexeddb/auto";
 import { cleanup } from "@testing-library/react";
 import { afterEach, vi } from "vitest";
+
+const cacheStore: Record<string, Response> = {};
+const mockCache = {
+  put: async (key: string, response: Response) => {
+    cacheStore[key] = response;
+  },
+  match: async (key: string) => cacheStore[key] ?? null,
+};
+Object.defineProperty(globalThis, "caches", {
+  value: { open: async () => mockCache },
+  writable: true,
+});
 
 afterEach(() => {
   cleanup();
