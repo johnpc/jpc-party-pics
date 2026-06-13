@@ -2,7 +2,8 @@ const FILE_CACHE_NAME = "partypics-file-cache";
 
 export async function cacheFile(id: string, file: File): Promise<void> {
   const cache = await caches.open(FILE_CACHE_NAME);
-  const response = new Response(file, {
+  const buffer = await file.arrayBuffer();
+  const response = new Response(buffer, {
     headers: { "Content-Type": file.type, "X-File-Name": file.name },
   });
   await cache.put(`/file-cache/${id}`, response);
