@@ -1,12 +1,10 @@
 import { Card, Image, Loader, useTheme } from "@aws-amplify/ui-react";
 import { Schema } from "../../../../amplify/data/resource";
-import { useEffect, useState } from "react";
 import { detectFileType } from "../../../helpers/detectFileType";
-import { getAccelerateUrl } from "../../../helpers/getAccelerateUrl";
-import { getThumbnailUrl } from "../../../helpers/getThumbnailUrl";
 import { canPlayVideoFile } from "../../../helpers/videoSupport";
 import { VideoFallback } from "./VideoFallback";
 import { useInView } from "../../../hooks/useInView";
+import { useImageUrl } from "../../../hooks/useImageUrl";
 
 export const SharedImage = (props: {
   image: Schema["Image"]["type"];
@@ -14,26 +12,7 @@ export const SharedImage = (props: {
 }) => {
   const { tokens } = useTheme();
   const { ref, inView } = useInView("300px");
-  const [url, setUrl] = useState<URL>();
-
-  useEffect(() => {
-    if (!inView) return;
-    const fileType = detectFileType(props.image.key);
-    const fetchUrl = async () => {
-      if (fileType === "image") {
-        try {
-          const thumbUrl = await getThumbnailUrl(props.image.key);
-          setUrl(thumbUrl);
-          return;
-        } catch {
-          // Thumbnail not yet generated, fall back to full-size
-        }
-      }
-      const resolved = await getAccelerateUrl(props.image.key);
-      setUrl(resolved);
-    };
-    fetchUrl();
-  }, [inView, props.image.key]);
+  const url = useImageUrl(props.image.key, inView);
 
   const fileType = detectFileType(props.image.key);
   const isUnsupportedVideo =
@@ -48,13 +27,13 @@ export const SharedImage = (props: {
 
   const imageComponent = isUnsupportedVideo ? (
     <VideoFallback
-      url={url?.toString()}
+      url={url}
       onClick={() => props.handleOpenModal(props.image)}
       style={mediaStyle}
     />
   ) : fileType === "image" ? (
     <Image
-      src={url?.toString()}
+      src={url}
       style={mediaStyle}
       key={props.image.key}
       alt={props.image.key}
@@ -72,7 +51,7 @@ export const SharedImage = (props: {
       autoPlay={true}
       loop={true}
       muted={true}
-      src={url?.toString()}
+      src={url}
     />
   );
 

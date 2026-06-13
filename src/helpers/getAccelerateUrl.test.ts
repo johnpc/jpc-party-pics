@@ -25,7 +25,7 @@ describe("getAccelerateUrl", () => {
       path: "public/album/photo.jpg",
       options: {
         validateObjectExistence: false,
-        expiresIn: 300,
+        expiresIn: 3600,
         useAccelerateEndpoint: true,
       },
     });

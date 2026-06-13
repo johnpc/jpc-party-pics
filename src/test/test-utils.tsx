@@ -28,5 +28,12 @@ export function renderWithProviders(
   return render(ui, { wrapper: AllProviders, ...options });
 }
 
+export function createWrapper() {
+  const queryClient = createTestQueryClient();
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+}
+
 export { render } from "@testing-library/react";
 export { default as userEvent } from "@testing-library/user-event";
