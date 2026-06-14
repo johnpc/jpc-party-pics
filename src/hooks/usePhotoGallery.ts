@@ -27,7 +27,7 @@ export function usePhotoGallery(albumName: string, zipFileEndpoint: string) {
 
   const deleteFile = async (key: string) => {
     const confirmed = confirm(
-      "Are you sure? This action is destructive. The image can never be recovered.",
+      "Are you sure you want to remove this photo from the album?",
     );
     if (!confirmed) return;
 
