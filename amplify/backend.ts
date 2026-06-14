@@ -50,6 +50,10 @@ transcodeLambda.addLayers(
     `arn:aws:lambda:${transcodeLambda.stack.region}:${transcodeLambda.stack.account}:layer:ffmpeg:1`,
   ),
 );
+const transcodeCfn = transcodeLambda.node.defaultChild as lambda.CfnFunction;
+transcodeCfn.addPropertyOverride("EphemeralStorage", {
+  Size: 10240,
+});
 
 const s3Bucket = backend.storage.resources.bucket;
 s3Bucket.grantReadWrite(transcodeLambda);
@@ -94,6 +98,10 @@ thumbnailLambda.addLayers(
     `arn:aws:lambda:${thumbnailLambda.stack.region}:${thumbnailLambda.stack.account}:layer:ffmpeg:1`,
   ),
 );
+const thumbnailCfn = thumbnailLambda.node.defaultChild as lambda.CfnFunction;
+thumbnailCfn.addPropertyOverride("EphemeralStorage", {
+  Size: 10240,
+});
 s3Bucket.grantReadWrite(thumbnailLambda);
 
 const thumbnailExtensions = [".jpg", ".jpeg", ".png", ".heic", ".gif", ".mp4"];
