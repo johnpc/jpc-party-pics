@@ -11,5 +11,6 @@
     "paths": {
       "$amplify/*": ["../.amplify/generated/*"]
     }
-  }
+  },
+  "exclude": ["**/*.test.ts", "function/__mocks__"]
 }
