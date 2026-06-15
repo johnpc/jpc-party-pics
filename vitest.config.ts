@@ -1,9 +1,18 @@
 /// <reference types="vitest" />
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
+import { resolve } from "path";
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "$amplify/env/getPartyPicsImages": resolve(
+        __dirname,
+        "amplify/function/__mocks__/env.ts",
+      ),
+    },
+  },
   test: {
     globals: true,
     environment: "jsdom",
@@ -18,8 +27,13 @@ export default defineConfig({
         lines: 80,
         statements: 80,
       },
-      include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/vite-env.d.ts", "src/test/**", "src/main.tsx"],
+      include: ["src/**/*.{ts,tsx}", "amplify/function/*.ts"],
+      exclude: [
+        "src/vite-env.d.ts",
+        "src/test/**",
+        "src/main.tsx",
+        "amplify/function/resource.ts",
+      ],
     },
   },
 });

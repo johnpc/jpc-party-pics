@@ -16,13 +16,17 @@ Object.defineProperty(globalThis, "caches", {
 });
 
 afterEach(() => {
-  cleanup();
+  if (typeof document !== "undefined") {
+    cleanup();
+  }
 });
 
-Object.defineProperty(document.documentElement, "clientWidth", {
-  value: 1200,
-  writable: true,
-});
+if (typeof document !== "undefined") {
+  Object.defineProperty(document.documentElement, "clientWidth", {
+    value: 1200,
+    writable: true,
+  });
+}
 
 vi.mock("aws-amplify/api", () => ({
   generateClient: () => ({
