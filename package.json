@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "check-crap": "tsx scripts/check-crap.ts",
+    "check-file-length": "tsx scripts/check-file-length.ts",
     "e2e": "npx bddgen && npx playwright test",
     "sandbox": "ampx sandbox --profile personal --once",
     "prod-config": "ampx generate outputs --app-id d131sf2ylw1gxp --branch main --profile personal",
