@@ -32,15 +32,26 @@ export const handler: Schema["getPartyPicsZipFile"]["functionHandler"] = async (
   const s3 = new S3Client();
   const zip = new JSZip();
   const hash = makeHash(10);
-  const listedObjects = await s3.send(
-    new ListObjectsV2Command({
-      Bucket: bucketName,
-      Prefix: `public/${albumName}`,
-    }),
-  );
+  const allObjects: { Key: string }[] = [];
+  let continuationToken: string | undefined;
+  do {
+    const response = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: `public/${albumName}`,
+        ContinuationToken: continuationToken,
+      }),
+    );
+    if (response.Contents) {
+      allObjects.push(
+        ...response.Contents.filter((o) => o.Key).map((o) => ({ Key: o.Key! })),
+      );
+    }
+    continuationToken = response.NextContinuationToken;
+  } while (continuationToken);
 
   // Add each file to the zip
-  for (const object of listedObjects.Contents || []) {
+  for (const object of allObjects) {
     const data = await s3.send(
       new GetObjectCommand({
         Bucket: bucketName,
