@@ -38,6 +38,9 @@ jobs:
       - name: CRAP score check
         run: npm run check-crap
 
+      - name: File length check
+        run: npm run check-file-length
+
       - name: Build
         run: npm run build
 
