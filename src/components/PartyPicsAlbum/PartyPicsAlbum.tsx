@@ -8,6 +8,7 @@ import {
   View,
 } from "@aws-amplify/ui-react";
 import { CopyLink } from "./CopyLink";
+import { HoneymoonFund } from "./HoneymoonFund";
 import { SharedPhotos } from "./SharedPhotos/SharedPhotos";
 import { useState } from "react";
 import { useUploadQueue } from "../../hooks/useUploadQueue";
@@ -21,6 +22,7 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
 
   const albumUrl = window.location.href;
   const kioskUrl = `${window.location.origin}/${props.albumName}/kiosk`;
+  const isWeddingAlbum = props.albumName.toLowerCase() === "wedding";
 
   return (
     <>
@@ -45,6 +47,8 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
       </Flex>
 
       {showShare && <SharePanel albumUrl={albumUrl} kioskUrl={kioskUrl} />}
+
+      {isWeddingAlbum && <HoneymoonFund />}
 
       <HeroUploadArea
         onFilesSelected={(files) => uploadQueue.addFiles(files)}

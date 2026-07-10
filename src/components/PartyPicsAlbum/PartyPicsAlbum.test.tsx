@@ -46,6 +46,10 @@ vi.mock("./UploadProgress", () => ({
   UploadProgress: () => <div data-testid="upload-progress" />,
 }));
 
+vi.mock("./HoneymoonFund", () => ({
+  HoneymoonFund: () => <div data-testid="honeymoon-fund" />,
+}));
+
 vi.mock("./HeroUploadArea", () => ({
   HeroUploadArea: ({ onTapCamera }: { onTapCamera: () => void }) => (
     <div data-testid="hero-upload">
@@ -116,5 +120,15 @@ describe("PartyPicsAlbum", () => {
   it("renders upload progress component", () => {
     renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
     expect(screen.getByTestId("upload-progress")).toBeInTheDocument();
+  });
+
+  it("shows the honeymoon fund on the wedding album", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="wedding" />);
+    expect(screen.getByTestId("honeymoon-fund")).toBeInTheDocument();
+  });
+
+  it("hides the honeymoon fund on other albums", () => {
+    renderWithProviders(<PartyPicsAlbum albumName="birthday" />);
+    expect(screen.queryByTestId("honeymoon-fund")).not.toBeInTheDocument();
   });
 });
