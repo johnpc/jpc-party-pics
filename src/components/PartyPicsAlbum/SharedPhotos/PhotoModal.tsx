@@ -5,6 +5,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Schema } from "../../../../amplify/data/resource";
 import { ModalImage } from "./ModalImage";
 import { humanFileSize } from "../../../helpers/humanFileSize";
+import { useSwipeNavigation } from "../../../hooks/useSwipeNavigation";
 import {
   getContainerStyle,
   getCloseButtonStyle,
@@ -34,6 +35,11 @@ export const PhotoModal = ({
   onDelete,
 }: PhotoModalProps) => {
   const { tokens } = useTheme();
+
+  const swipeHandlers = useSwipeNavigation(
+    () => image && onForward(image),
+    () => image && onBack(image),
+  );
 
   if (!image) return null;
 
@@ -67,6 +73,8 @@ export const PhotoModal = ({
           flex="1"
           width="100%"
           gap={tokens.space.xs}
+          onTouchStart={swipeHandlers.onTouchStart}
+          onTouchEnd={swipeHandlers.onTouchEnd}
         >
           <Text as="span" onClick={() => onBack(image)} style={getArrowStyle()}>
             <ArrowBackIosIcon fontSize={getArrowSize()} />

@@ -30,6 +30,16 @@ Feature: Photo Gallery
     When I click the back arrow
     Then I should see the previous photo
 
+  Scenario: Swiping left navigates forward in modal
+    Given the photo modal is open
+    When I swipe left on the photo
+    Then I should see the next photo
+
+  Scenario: Swiping right navigates backward in modal
+    Given the photo modal is open
+    When I swipe right on the photo
+    Then I should see the previous photo
+
   Scenario: Closing the modal
     Given the photo modal is open
     When I click outside the modal

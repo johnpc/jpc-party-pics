@@ -55,6 +55,34 @@ When("I click the back arrow", async ({ page }) => {
   await page.locator("[data-testid='ArrowBackIosIcon']").click();
 });
 
+async function swipeModalImage(
+  page: import("@playwright/test").Page,
+  direction: "left" | "right",
+) {
+  const img = page.locator(".MuiModal-root img[src*='s3']").first();
+  const box = await img.boundingBox();
+  if (!box) throw new Error("Modal image not visible");
+  const y = box.y + box.height / 2;
+  const from =
+    direction === "left" ? box.x + box.width * 0.8 : box.x + box.width * 0.2;
+  const to =
+    direction === "left" ? box.x + box.width * 0.2 : box.x + box.width * 0.8;
+  await page.dispatchEvent(".MuiModal-root img[src*='s3']", "touchstart", {
+    touches: [{ clientX: from, clientY: y }],
+  });
+  await page.dispatchEvent(".MuiModal-root img[src*='s3']", "touchend", {
+    changedTouches: [{ clientX: to, clientY: y }],
+  });
+}
+
+When("I swipe left on the photo", async ({ page }) => {
+  await swipeModalImage(page, "left");
+});
+
+When("I swipe right on the photo", async ({ page }) => {
+  await swipeModalImage(page, "right");
+});
+
 When("I click outside the modal", async ({ page }) => {
   await page.keyboard.press("Escape");
 });
