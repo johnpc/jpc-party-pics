@@ -55,33 +55,35 @@ When("I click the back arrow", async ({ page }) => {
   await page.locator("[data-testid='ArrowBackIosIcon']").click();
 });
 
-async function swipeModalImage(
-  page: import("@playwright/test").Page,
-  direction: "left" | "right",
-) {
-  const img = page.locator(".MuiModal-root img[src*='s3']").first();
-  const box = await img.boundingBox();
-  if (!box) throw new Error("Modal image not visible");
-  const y = box.y + box.height / 2;
-  const from =
-    direction === "left" ? box.x + box.width * 0.8 : box.x + box.width * 0.2;
-  const to =
-    direction === "left" ? box.x + box.width * 0.2 : box.x + box.width * 0.8;
-  await page.dispatchEvent(".MuiModal-root img[src*='s3']", "touchstart", {
-    touches: [{ clientX: from, clientY: y }],
-  });
-  await page.dispatchEvent(".MuiModal-root img[src*='s3']", "touchend", {
-    changedTouches: [{ clientX: to, clientY: y }],
-  });
+async function swipe(page: import("@playwright/test").Page, dir: "L" | "R") {
+  const sel = ".MuiModal-root img[src*='s3']";
+  await page.locator(sel).first().waitFor();
+  await page.evaluate(
+    ({ sel, dir }) => {
+      const el = document.querySelector(sel) as HTMLElement;
+      const r = el.getBoundingClientRect();
+      const y = r.top + r.height / 2;
+      const [fx, tx] = dir === "L" ? [0.8, 0.2] : [0.2, 0.8];
+      const mk = (f: number) =>
+        new Touch({
+          identifier: 1,
+          target: el,
+          clientX: r.left + r.width * f,
+          clientY: y,
+        });
+      el.dispatchEvent(
+        new TouchEvent("touchstart", { bubbles: true, touches: [mk(fx)] }),
+      );
+      el.dispatchEvent(
+        new TouchEvent("touchend", { bubbles: true, changedTouches: [mk(tx)] }),
+      );
+    },
+    { sel, dir },
+  );
 }
 
-When("I swipe left on the photo", async ({ page }) => {
-  await swipeModalImage(page, "left");
-});
-
-When("I swipe right on the photo", async ({ page }) => {
-  await swipeModalImage(page, "right");
-});
+When("I swipe left on the photo", async ({ page }) => swipe(page, "L"));
+When("I swipe right on the photo", async ({ page }) => swipe(page, "R"));
 
 When("I click outside the modal", async ({ page }) => {
   await page.keyboard.press("Escape");
@@ -112,9 +114,8 @@ Then("I should see photos in a grid layout", async ({ page }) => {
   });
 });
 
-Then("photos should be sorted newest first", async () => {
-  // Verified by checking that the first photo has the most recent date
-});
+// Verified visually: first photo has the most recent date
+Then("photos should be sorted newest first", async () => {});
 
 Then("I should see the photo modal", async ({ page }) => {
   await expect(page.locator(".MuiModal-root")).toBeVisible();
@@ -135,21 +136,16 @@ Then("I should see a delete button", async ({ page }) => {
   await expect(page.getByRole("button", { name: /Delete/ })).toBeVisible();
 });
 
-Then("I should see the next photo", async () => {
-  // Modal image changes — verified visually
-});
-
-Then("I should see the previous photo", async () => {
-  // Modal image changes — verified visually
-});
+// Modal image changes — verified visually
+Then("I should see the next photo", async () => {});
+Then("I should see the previous photo", async () => {});
 
 Then("the modal should close", async ({ page }) => {
   await expect(page.locator(".MuiModal-root")).not.toBeVisible();
 });
 
-Then("the photo should open in a new tab", async () => {
-  // Opens in new window — cannot assert in single-tab context
-});
+// Opens in new window — cannot assert in single-tab context
+Then("the photo should open in a new tab", async () => {});
 
 Then("the photo should be removed from the album", async ({ page }) => {
   await expect(page.locator(".MuiModal-root")).not.toBeVisible();
@@ -159,6 +155,5 @@ Then("the photo should still be in the album", async ({ page }) => {
   await expect(page.locator("img").first()).toBeVisible();
 });
 
-Then("a zip file should begin downloading", async () => {
-  // Download triggered — verified via network request
-});
+// Download triggered — verified via network request
+Then("a zip file should begin downloading", async () => {});
