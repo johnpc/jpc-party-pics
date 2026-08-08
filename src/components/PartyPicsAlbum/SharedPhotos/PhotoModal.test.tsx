@@ -14,13 +14,19 @@ vi.mock("@aws-amplify/ui-react", () => ({
   Flex: ({
     children,
     onKeyUpCapture,
+    onTouchStart,
+    onTouchEnd,
   }: {
     children: React.ReactNode;
     onKeyUpCapture?: (e: { keyCode: number }) => void;
+    onTouchStart?: React.TouchEventHandler;
+    onTouchEnd?: React.TouchEventHandler;
   }) => (
     <div
       data-testid="flex-container"
       onKeyUpCapture={onKeyUpCapture as unknown as React.KeyboardEventHandler}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       {children}
     </div>
@@ -75,6 +81,19 @@ vi.mock("../../../helpers/isMobileScreenSize", () => ({
 
 vi.mock("../../../helpers/humanFileSize", () => ({
   humanFileSize: (bytes: number) => `${bytes}B`,
+}));
+
+// Capture the callbacks PhotoModal wires into the swipe hook so we can assert
+// swipe-left -> forward and swipe-right -> back. The hook's touch-detection
+// logic is unit-tested separately in useSwipeNavigation.test.ts.
+let swipeLeft: () => void;
+let swipeRight: () => void;
+vi.mock("../../../hooks/useSwipeNavigation", () => ({
+  useSwipeNavigation: (onLeft: () => void, onRight: () => void) => {
+    swipeLeft = onLeft;
+    swipeRight = onRight;
+    return { onTouchStart: vi.fn(), onTouchEnd: vi.fn() };
+  },
 }));
 
 const image = { key: "photo.jpg", date: "2024-01-01", size: 1000 };
@@ -234,6 +253,38 @@ describe("PhotoModal", () => {
     );
     const containers = screen.getAllByTestId("flex-container");
     fireEvent.keyUp(containers[0], { keyCode: 37 });
+    expect(onBack).toHaveBeenCalledWith(image);
+  });
+
+  it("navigates forward on swipe left", () => {
+    const onForward = vi.fn();
+    renderWithProviders(
+      <PhotoModal
+        image={image}
+        onClose={vi.fn()}
+        onBack={vi.fn()}
+        onForward={onForward}
+        onDownload={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    swipeLeft();
+    expect(onForward).toHaveBeenCalledWith(image);
+  });
+
+  it("navigates back on swipe right", () => {
+    const onBack = vi.fn();
+    renderWithProviders(
+      <PhotoModal
+        image={image}
+        onClose={vi.fn()}
+        onBack={onBack}
+        onForward={vi.fn()}
+        onDownload={vi.fn()}
+        onDelete={vi.fn()}
+      />,
+    );
+    swipeRight();
     expect(onBack).toHaveBeenCalledWith(image);
   });
 
