@@ -5,6 +5,7 @@ import { canPlayVideoFile } from "../../../helpers/videoSupport";
 import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
 import { VideoFallback } from "./VideoFallback";
 import { useImageUrl } from "../../../hooks/useImageUrl";
+import { useImageZoom } from "../../../hooks/useImageZoom";
 
 const mediaStyle = isMobileScreenSize
   ? { width: "100%", maxHeight: "70vh", objectFit: "contain" as const }
@@ -18,6 +19,7 @@ const mediaStyle = isMobileScreenSize
 export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
   const { tokens } = useTheme();
   const url = useImageUrl(props.image.key, true, "full");
+  const zoom = useImageZoom();
 
   const fileType = detectFileType(props.image.key);
   const isUnsupportedVideo =
@@ -32,9 +34,17 @@ export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
   return fileType === "image" ? (
     <Image
       src={url}
-      style={{ borderRadius: tokens.radii.large.value, ...mediaStyle }}
+      style={{
+        borderRadius: tokens.radii.large.value,
+        ...mediaStyle,
+        ...zoom.style,
+      }}
       key={props.image.key}
       alt={props.image.key}
+      onDoubleClick={zoom.onDoubleClick}
+      onTouchStart={zoom.onTouchStart}
+      onTouchMove={zoom.onTouchMove}
+      onTouchEnd={zoom.onTouchEnd}
     />
   ) : (
     <video
