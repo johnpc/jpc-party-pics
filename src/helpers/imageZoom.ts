@@ -1,7 +1,7 @@
 export const ZOOM_SCALE = 2.5;
 export const DOUBLE_TAP_MS = 300;
-// A touch double-tap makes the browser synthesize a trailing dblclick; ignore
-// dblclicks that land within this window of a touch-driven toggle.
+// A touch double-tap makes the browser synthesize a trailing double click;
+// ignore double clicks that land within this window of a touch-driven toggle.
 export const GHOST_CLICK_MS = 700;
 
 export interface Point {
