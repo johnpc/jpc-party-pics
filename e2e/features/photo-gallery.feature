@@ -40,6 +40,11 @@ Feature: Photo Gallery
     When I swipe right on the photo
     Then I should see the previous photo
 
+  Scenario: Double tapping zooms into the photo
+    Given the photo modal is open
+    When I double tap the photo
+    Then the photo should appear zoomed in
+
   Scenario: Closing the modal
     Given the photo modal is open
     When I click outside the modal

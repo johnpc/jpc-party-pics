@@ -28,6 +28,17 @@ vi.mock("../../../helpers/videoSupport", () => ({
   canPlayVideoFile: () => true,
 }));
 
+vi.mock("../../../hooks/useImageZoom", () => ({
+  useImageZoom: () => ({
+    zoomed: false,
+    style: {},
+    onDoubleClick: vi.fn(),
+    onTouchStart: vi.fn(),
+    onTouchMove: vi.fn(),
+    onTouchEnd: vi.fn(),
+  }),
+}));
+
 describe("ModalImage", () => {
   it("renders image after URL loads", async () => {
     renderWithProviders(
