@@ -12,6 +12,7 @@ export default defineConfig({
   use: {
     baseURL: "http://localhost:5173",
     headless: true,
+    hasTouch: true,
     permissions: ["camera", "microphone"],
     launchOptions: {
       args: [

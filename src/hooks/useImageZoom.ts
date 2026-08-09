@@ -3,6 +3,7 @@ import {
   Point,
   ZOOM_SCALE,
   isDoubleTap,
+  isGhostClick,
   panOrigin,
   panOffset,
   zoomStyle,
@@ -16,6 +17,7 @@ export function useImageZoom() {
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const lastTap = useRef(0);
+  const lastTouchToggle = useRef(0);
   const dragStart = useRef<Point | null>(null);
 
   const zoomed = scale > 1;
@@ -23,6 +25,13 @@ export function useImageZoom() {
   const toggle = () => {
     setOffset({ x: 0, y: 0 });
     setScale(zoomed ? 1 : ZOOM_SCALE);
+  };
+
+  // Mouse-only entry point. A touch double-tap synthesizes a trailing dblclick,
+  // which would immediately undo the touch toggle — swallow that ghost click.
+  const onDoubleClick = () => {
+    if (isGhostClick(Date.now() - lastTouchToggle.current)) return;
+    toggle();
   };
 
   const onTouchStart = (event: React.TouchEvent) => {
@@ -47,13 +56,14 @@ export function useImageZoom() {
     if (!isDoubleTap(sinceLast)) return;
     event.stopPropagation();
     lastTap.current = 0;
+    lastTouchToggle.current = Date.now();
     toggle();
   };
 
   return {
     zoomed,
     style: zoomStyle(scale, offset, dragging),
-    onDoubleClick: toggle,
+    onDoubleClick,
     onTouchStart,
     onTouchMove,
     onTouchEnd,
