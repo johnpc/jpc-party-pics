@@ -57,6 +57,32 @@ describe("useImageZoom", () => {
     expect(result.current.zoomed).toBe(false);
   });
 
+  it("stays zoomed when a ghost dblclick follows a touch double tap", () => {
+    // Real mobile: a touch double-tap toggles zoom, then the browser fires a
+    // synthesized dblclick. That ghost click must NOT undo the zoom.
+    const { result } = renderHook(() => useImageZoom());
+    act(() => result.current.onTouchEnd(touch(0, 0)));
+    now += 100;
+    act(() => result.current.onTouchEnd(touch(0, 0)));
+    expect(result.current.zoomed).toBe(true);
+    now += 50; // synthesized dblclick lands right after
+    act(() => result.current.onDoubleClick());
+    expect(result.current.zoomed).toBe(true);
+  });
+
+  it("un-zooms on a genuine second touch double tap", () => {
+    const { result } = renderHook(() => useImageZoom());
+    act(() => result.current.onTouchEnd(touch(0, 0)));
+    now += 100;
+    act(() => result.current.onTouchEnd(touch(0, 0)));
+    expect(result.current.zoomed).toBe(true);
+    now += 1000; // well past the ghost-click window
+    act(() => result.current.onTouchEnd(touch(0, 0)));
+    now += 100;
+    act(() => result.current.onTouchEnd(touch(0, 0)));
+    expect(result.current.zoomed).toBe(false);
+  });
+
   it("pans while zoomed", () => {
     const { result } = renderHook(() => useImageZoom());
     act(() => result.current.onDoubleClick());

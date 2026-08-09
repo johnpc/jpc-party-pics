@@ -45,6 +45,13 @@ Feature: Photo Gallery
     When I double tap the photo
     Then the photo should appear zoomed in
 
+  Scenario: Double tapping again zooms back out
+    Given the photo modal is open
+    When I double tap the photo
+    Then the photo should appear zoomed in
+    When I double tap the photo
+    Then the photo should not be zoomed
+
   Scenario: Closing the modal
     Given the photo modal is open
     When I click outside the modal

@@ -1,11 +1,24 @@
 import { describe, it, expect } from "vitest";
-import { isDoubleTap, panOrigin, panOffset, zoomStyle } from "./imageZoom";
+import {
+  isDoubleTap,
+  isGhostClick,
+  panOrigin,
+  panOffset,
+  zoomStyle,
+} from "./imageZoom";
 
 describe("imageZoom helpers", () => {
   it("isDoubleTap true for fast taps, false otherwise", () => {
     expect(isDoubleTap(100)).toBe(true);
     expect(isDoubleTap(0)).toBe(false);
     expect(isDoubleTap(400)).toBe(false);
+  });
+
+  it("isGhostClick true within the window, false after", () => {
+    expect(isGhostClick(50)).toBe(true);
+    expect(isGhostClick(699)).toBe(true);
+    expect(isGhostClick(700)).toBe(false);
+    expect(isGhostClick(2000)).toBe(false);
   });
 
   it("panOrigin subtracts current offset from the touch point", () => {
