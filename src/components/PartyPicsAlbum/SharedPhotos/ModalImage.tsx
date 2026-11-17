@@ -1,7 +1,6 @@
 import { Image, useTheme } from "@aws-amplify/ui-react";
 import { Schema } from "../../../../amplify/data/resource";
-import { detectFileType } from "../../../helpers/detectFileType";
-import { canPlayVideoFile } from "../../../helpers/videoSupport";
+import { mediaKind } from "../../../helpers/mediaKind";
 import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
 import { VideoFallback } from "./VideoFallback";
 import { useImageUrl } from "../../../hooks/useImageUrl";
@@ -21,17 +20,15 @@ export const ModalImage = (props: { image: Schema["Image"]["type"] }) => {
   const url = useImageUrl(props.image.key, true, "full");
   const zoom = useImageZoom();
 
-  const fileType = detectFileType(props.image.key);
-  const isUnsupportedVideo =
-    fileType === "video" && !canPlayVideoFile(props.image.key);
+  const kind = mediaKind(props.image.key);
 
-  if (isUnsupportedVideo) {
+  if (kind === "unsupported-video") {
     return (
       <VideoFallback url={url} style={{ width: "80%", maxHeight: "50vh" }} />
     );
   }
 
-  return fileType === "image" ? (
+  return kind === "image" ? (
     <Image
       src={url}
       style={{

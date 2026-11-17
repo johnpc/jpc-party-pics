@@ -15,6 +15,8 @@ import { useUploadQueue } from "../../hooks/useUploadQueue";
 import { UploadProgress } from "./UploadProgress";
 import { HeroUploadArea } from "./HeroUploadArea";
 
+// @state-machine share-panel
+// hidden ⇄ shown; a plain toggle with one writer (the Share button).
 export const PartyPicsAlbum = (props: { albumName: string }) => {
   const { tokens } = useTheme();
   const [showShare, setShowShare] = useState(false);
@@ -57,7 +59,8 @@ export const PartyPicsAlbum = (props: { albumName: string }) => {
         }
         isUploading={uploadQueue.isUploading}
         activeCount={uploadQueue.activeCount}
-        errorCount={uploadQueue.errorCount}
+        retryableCount={uploadQueue.retryableCount}
+        exhaustedCount={uploadQueue.exhaustedCount}
         onRetry={uploadQueue.retryFailed}
       />
 

@@ -1,7 +1,6 @@
 import { Image, Loader, useTheme } from "@aws-amplify/ui-react";
 import { Schema } from "../../../../amplify/data/resource";
-import { detectFileType } from "../../../helpers/detectFileType";
-import { canPlayVideoFile } from "../../../helpers/videoSupport";
+import { mediaKind } from "../../../helpers/mediaKind";
 import { VideoFallback } from "./VideoFallback";
 import { useImageUrl } from "../../../hooks/useImageUrl";
 
@@ -13,15 +12,13 @@ export const KioskImage = (props: { image: Schema["Image"]["type"] }) => {
     return <Loader size="small" />;
   }
 
-  const fileType = detectFileType(props.image.key);
-  const isUnsupportedVideo =
-    fileType === "video" && !canPlayVideoFile(props.image.key);
+  const kind = mediaKind(props.image.key);
 
-  if (isUnsupportedVideo) {
+  if (kind === "unsupported-video") {
     return <VideoFallback url={url} style={{ height: "auto" }} />;
   }
 
-  return fileType === "image" ? (
+  return kind === "image" ? (
     <Image
       src={url}
       style={{

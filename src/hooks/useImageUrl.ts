@@ -21,6 +21,9 @@ async function fetchFullUrl(key: string): Promise<string> {
   return url.toString();
 }
 
+// @state-machine image-url
+// Owned by react-query: pending → success(url) | error; `data` undefined =
+// still loading. Thumbnail-or-full fallback happens inside the queryFn.
 export function useImageUrl(
   key: string,
   enabled: boolean,

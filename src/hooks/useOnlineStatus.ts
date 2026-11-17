@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+// @state-machine online-status
+// Mirrors navigator.onLine; the browser events are the only writers.
 export function useOnlineStatus(): boolean {
   const [online, setOnline] = useState(navigator.onLine);
 

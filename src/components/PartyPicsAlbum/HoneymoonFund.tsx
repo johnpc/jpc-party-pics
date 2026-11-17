@@ -11,6 +11,8 @@ import {
 const fundUrl =
   "https://fundraise.jpc.io/goal/303574f2-155d-4202-81c6-e710fc78173b/";
 
+// @state-machine honeymoon-banner
+// shown → dismissed (one-way, per page load).
 export const HoneymoonFund = () => {
   const { tokens } = useTheme();
   const [dismissed, setDismissed] = useState(false);

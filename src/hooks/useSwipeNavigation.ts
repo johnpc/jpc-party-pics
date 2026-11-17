@@ -4,6 +4,8 @@ const SWIPE_THRESHOLD = 50; // px of horizontal travel to count as a swipe
 
 // Returns touch handlers that fire onSwipeLeft/onSwipeRight when the user
 // drags horizontally past the threshold. Vertical-dominant drags are ignored.
+// @state-machine swipe-gesture
+// idle (null) → tracking(start point) → idle; a nullable ref is the whole machine.
 export function useSwipeNavigation(
   onSwipeLeft: () => void,
   onSwipeRight: () => void,

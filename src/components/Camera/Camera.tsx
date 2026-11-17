@@ -38,13 +38,13 @@ export const Camera = ({ albumName }: { albumName: string }) => {
       />
       <canvas ref={cam.canvasRef} style={{ display: "none" }} />
 
-      <CameraStatusAlert status={cam.status} />
+      <CameraStatusAlert phase={cam.phase} stream={cam.stream} />
 
       <Flex justifyContent="center" gap="1rem">
         <CaptureControls
           mode={cam.mode}
-          status={cam.status}
-          recording={cam.recording}
+          phase={cam.phase}
+          streamLive={cam.stream === "live"}
           onCapture={cam.capturePhoto}
           onStartRecording={cam.startRecording}
           onStopRecording={cam.stopRecording}

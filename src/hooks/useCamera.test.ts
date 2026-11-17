@@ -55,8 +55,8 @@ describe("useCamera", () => {
 
     expect(result.current.mode).toBe("photo");
     expect(result.current.streaming).toBe(false);
-    expect(result.current.recording).toBe(false);
-    expect(result.current.status).toBe("idle");
+    expect(result.current.stream).toBe("off");
+    expect(result.current.phase).toEqual({ kind: "idle" });
   });
 
   it("starts camera and sets streaming to true", async () => {
@@ -117,6 +117,7 @@ describe("useCamera", () => {
     });
 
     expect(result.current.streaming).toBe(false);
+    expect(result.current.stream).toBe("denied");
   });
 
   it("capturePhoto does nothing when refs are null", async () => {
@@ -140,7 +141,7 @@ describe("useCamera", () => {
       result.current.startRecording();
     });
 
-    expect(result.current.recording).toBe(false);
+    expect(result.current.phase).toEqual({ kind: "idle" });
   });
 
   it("stopRecording calls stop on mediaRecorder", async () => {
@@ -177,7 +178,7 @@ describe("useCamera", () => {
       result.current.startRecording();
     });
 
-    expect(result.current.recording).toBe(true);
+    expect(result.current.phase).toEqual({ kind: "recording", bytes: 0 });
     expect(mockStart).toHaveBeenCalled();
 
     act(() => {
@@ -185,7 +186,6 @@ describe("useCamera", () => {
     });
 
     expect(mockRecorderStop).toHaveBeenCalled();
-    expect(result.current.recording).toBe(false);
   });
 
   it("capturePhoto uploads when refs are available", async () => {
@@ -290,7 +290,7 @@ describe("useCamera", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.status).toBe("idle");
+      expect(result.current.phase).toEqual({ kind: "idle" });
     });
   });
 
@@ -339,7 +339,7 @@ describe("useCamera", () => {
     });
 
     expect(mockUploadVideo).not.toHaveBeenCalled();
-    expect(result.current.status).toBe("idle");
+    expect(result.current.phase).toEqual({ kind: "idle" });
 
     mockIsVideoTooShort.mockReturnValue(false);
   });
@@ -392,5 +392,101 @@ describe("useCamera", () => {
       expect(mockUploadVideo).toHaveBeenCalled();
       expect(mockMutateAsync).toHaveBeenCalled();
     });
+    await waitFor(() => {
+      expect(result.current.phase).toEqual({ kind: "success" });
+    });
+    await waitFor(
+      () => expect(result.current.phase).toEqual({ kind: "idle" }),
+      { timeout: 3000 },
+    );
+  });
+
+  it("counts recorded bytes while recording", async () => {
+    let capturedOnData: ((e: { data: Blob }) => void) | null = null;
+    const MockMediaRecorder = class {
+      state = "inactive";
+      set ondataavailable(fn: ((e: { data: Blob }) => void) | null) {
+        capturedOnData = fn;
+      }
+      set onstop(_fn: (() => void) | null) {}
+      start() {
+        this.state = "recording";
+      }
+      stop() {}
+      static isTypeSupported() {
+        return true;
+      }
+    };
+    vi.stubGlobal("MediaRecorder", MockMediaRecorder);
+
+    const { result } = renderHook(() => useCamera("wedding"), {
+      wrapper: createWrapper(),
+    });
+    await act(async () => {
+      await result.current.startCamera();
+    });
+    act(() => {
+      result.current.startRecording();
+    });
+    act(() => {
+      capturedOnData?.({ data: new Blob([new Uint8Array(1000)]) });
+      capturedOnData?.({ data: new Blob([]) });
+      capturedOnData?.({ data: new Blob([new Uint8Array(500)]) });
+    });
+    expect(result.current.phase).toEqual({ kind: "recording", bytes: 1500 });
+  });
+
+  it("a late success flash can never knock a newer upload back to idle", async () => {
+    vi.useFakeTimers();
+    let resolveSecond: (key: string) => void = () => {};
+    mockUploadPhoto
+      .mockResolvedValueOnce("public/album/hash/one.jpg")
+      .mockImplementationOnce(
+        () => new Promise<string>((r) => (resolveSecond = r)),
+      );
+    const mockToBlob = vi.fn((cb: (blob: Blob | null) => void) => {
+      cb(new Blob(["data"], { type: "image/jpeg" }));
+    });
+    const videoEl = document.createElement("video");
+    const canvasEl = document.createElement("canvas");
+    canvasEl.getContext = vi.fn().mockReturnValue({
+      drawImage: vi.fn(),
+    }) as unknown as typeof canvasEl.getContext;
+    canvasEl.toBlob = mockToBlob as unknown as typeof canvasEl.toBlob;
+
+    const { result } = renderHook(() => useCamera("wedding"), {
+      wrapper: createWrapper(),
+    });
+    (result.current.videoRef as { current: HTMLVideoElement | null }).current =
+      videoEl;
+    (
+      result.current.canvasRef as { current: HTMLCanvasElement | null }
+    ).current = canvasEl;
+
+    await act(async () => {
+      await result.current.capturePhoto();
+    });
+    expect(result.current.phase).toEqual({ kind: "success" });
+
+    // Second capture starts 1 s into the 1.5 s flash.
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+    await act(async () => {
+      await result.current.capturePhoto();
+    });
+    expect(result.current.phase).toEqual({ kind: "uploading" });
+
+    // The first flash's deadline passes: the upload must still be in flight.
+    await act(async () => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(result.current.phase).toEqual({ kind: "uploading" });
+
+    await act(async () => {
+      resolveSecond("public/album/hash/two.jpg");
+    });
+    expect(result.current.phase).toEqual({ kind: "success" });
+    vi.useRealTimers();
   });
 });

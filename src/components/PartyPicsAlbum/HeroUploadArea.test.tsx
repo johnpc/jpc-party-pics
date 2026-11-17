@@ -34,7 +34,8 @@ describe("HeroUploadArea", () => {
     onTapCamera: vi.fn(),
     isUploading: false,
     activeCount: 0,
-    errorCount: 0,
+    retryableCount: 0,
+    exhaustedCount: 0,
     onRetry: vi.fn(),
   };
 
@@ -84,7 +85,9 @@ describe("HeroUploadArea", () => {
   });
 
   it("shows error count and retry button", () => {
-    renderWithProviders(<HeroUploadArea {...defaultProps} errorCount={2} />);
+    renderWithProviders(
+      <HeroUploadArea {...defaultProps} retryableCount={2} />,
+    );
     expect(screen.getByText("2 failed")).toBeInTheDocument();
     expect(screen.getByText("Retry")).toBeInTheDocument();
   });
@@ -92,7 +95,7 @@ describe("HeroUploadArea", () => {
   it("calls onRetry when Retry clicked", () => {
     const onRetry = vi.fn();
     renderWithProviders(
-      <HeroUploadArea {...defaultProps} errorCount={1} onRetry={onRetry} />,
+      <HeroUploadArea {...defaultProps} retryableCount={1} onRetry={onRetry} />,
     );
     fireEvent.click(screen.getByText("Retry"));
     expect(onRetry).toHaveBeenCalled();
@@ -102,5 +105,25 @@ describe("HeroUploadArea", () => {
     renderWithProviders(<HeroUploadArea {...defaultProps} />);
     expect(screen.queryByText(/Uploading/)).not.toBeInTheDocument();
     expect(screen.queryByText(/failed/)).not.toBeInTheDocument();
+  });
+
+  it("hides Retry and asks for re-selection when every failure is exhausted", () => {
+    renderWithProviders(
+      <HeroUploadArea {...defaultProps} exhaustedCount={2} />,
+    );
+    expect(screen.getByText("2 failed — please re-select")).toBeInTheDocument();
+    expect(screen.queryByText("Retry")).not.toBeInTheDocument();
+  });
+
+  it("keeps Retry when some failures are still retryable", () => {
+    renderWithProviders(
+      <HeroUploadArea
+        {...defaultProps}
+        retryableCount={1}
+        exhaustedCount={1}
+      />,
+    );
+    expect(screen.getByText("2 failed")).toBeInTheDocument();
+    expect(screen.getByText("Retry")).toBeInTheDocument();
   });
 });

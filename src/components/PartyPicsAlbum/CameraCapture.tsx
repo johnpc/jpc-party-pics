@@ -12,6 +12,7 @@ export const CameraCapture = ({ albumName }: { albumName: string }) => {
     return (
       <Flex direction="column" gap="0.5rem" marginBottom={tokens.space.medium}>
         <Button onClick={cam.startCamera}>📷 Use Camera</Button>
+        <CameraStatusAlert phase={cam.phase} stream={cam.stream} />
       </Flex>
     );
   }
@@ -37,12 +38,11 @@ export const CameraCapture = ({ albumName }: { albumName: string }) => {
         />
         <canvas ref={cam.canvasRef} style={{ display: "none" }} />
 
-        <CameraStatusAlert status={cam.status} />
+        <CameraStatusAlert phase={cam.phase} />
 
         <CaptureControls
           mode={cam.mode}
-          status={cam.status}
-          recording={cam.recording}
+          phase={cam.phase}
           onCapture={cam.capturePhoto}
           onStartRecording={cam.startRecording}
           onStopRecording={cam.stopRecording}

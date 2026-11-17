@@ -70,7 +70,8 @@ describe("useUploadQueue", () => {
     expect(result.current.queue).toEqual([]);
     expect(result.current.isUploading).toBe(false);
     expect(result.current.activeCount).toBe(0);
-    expect(result.current.errorCount).toBe(0);
+    expect(result.current.retryableCount).toBe(0);
+    expect(result.current.exhaustedCount).toBe(0);
   });
 
   it("addFiles queues files for upload", async () => {
@@ -124,7 +125,8 @@ describe("useUploadQueue", () => {
 
     const { result } = renderHook(() => useUploadQueue("wedding"), { wrapper });
     await act(async () => {});
-    expect(result.current.errorCount).toBe(1);
+    expect(result.current.retryableCount).toBe(1);
+    expect(result.current.exhaustedCount).toBe(0);
   });
 
   it("retryFailed resets error items to pending", async () => {

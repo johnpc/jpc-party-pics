@@ -8,6 +8,8 @@ interface State {
   hasError: boolean;
 }
 
+// @state-machine error-boundary
+// ok → crashed; React owns the transition, reload is the only way back.
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false };
 

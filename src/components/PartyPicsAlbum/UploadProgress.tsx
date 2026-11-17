@@ -1,23 +1,14 @@
 import { Flex, Text, useTheme } from "@aws-amplify/ui-react";
 import { QueuedUpload } from "../../helpers/uploadQueue";
+import { isFailed, statusLabel } from "../../helpers/uploadItemState";
 
-const statusLabel: Record<string, string> = {
-  pending: "Waiting...",
-  compressing: "Compressing...",
-  uploading: "Uploading...",
-  registering: "Finishing...",
-  complete: "Done!",
-  error: "Failed",
-};
+function barColor(item: QueuedUpload): string {
+  if (isFailed(item)) return "#e53e3e";
+  if (item.status === "complete") return "#38a169";
+  return "#3182ce";
+}
 
-function ProgressBar(props: { progress: number; status: string }) {
-  const color =
-    props.status === "error"
-      ? "#e53e3e"
-      : props.status === "complete"
-        ? "#38a169"
-        : "#3182ce";
-
+function ProgressBar(props: { item: QueuedUpload }) {
   return (
     <div
       style={{
@@ -30,9 +21,9 @@ function ProgressBar(props: { progress: number; status: string }) {
     >
       <div
         style={{
-          width: `${props.progress}%`,
+          width: `${props.item.progress}%`,
           height: "100%",
-          backgroundColor: color,
+          backgroundColor: barColor(props.item),
           transition: "width 0.3s ease",
         }}
       />
@@ -51,14 +42,11 @@ function UploadItem(props: { item: QueuedUpload }) {
     <Flex direction="column" gap="2px" padding="4px 0">
       <Flex justifyContent="space-between" alignItems="center">
         <Text fontSize="small">{truncatedName}</Text>
-        <Text
-          fontSize="small"
-          color={item.status === "error" ? "red" : undefined}
-        >
-          {statusLabel[item.status] ?? item.status}
+        <Text fontSize="small" color={isFailed(item) ? "red" : undefined}>
+          {statusLabel(item)}
         </Text>
       </Flex>
-      <ProgressBar progress={item.progress} status={item.status} />
+      <ProgressBar item={item} />
       {item.error && (
         <Text fontSize="small" color="red">
           {item.error}

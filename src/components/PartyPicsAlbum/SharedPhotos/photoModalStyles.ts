@@ -32,12 +32,28 @@ export function getCloseButtonStyle(): React.CSSProperties | undefined {
     : undefined;
 }
 
-export function getArrowStyle(): React.CSSProperties {
+// On phones the image spans the full width, so the arrows float over its
+// edges instead of being squeezed out of the row.
+export function getArrowStyle(side: "left" | "right"): React.CSSProperties {
+  if (!isMobileScreenSize) {
+    return { cursor: "pointer", padding: "1rem 0.5rem" };
+  }
   return {
     cursor: "pointer",
-    padding: "1rem 0.5rem",
-    color: isMobileScreenSize ? "white" : undefined,
+    position: "absolute",
+    [side]: "0.25rem",
+    top: "50%",
+    transform: "translateY(-50%)",
+    zIndex: 1,
+    padding: "0.75rem 0.5rem",
+    color: "white",
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: "999px",
   };
+}
+
+export function getStageStyle(): React.CSSProperties | undefined {
+  return isMobileScreenSize ? { position: "relative" } : undefined;
 }
 
 export function getArrowSize(): "large" | "medium" {
