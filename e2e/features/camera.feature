@@ -32,5 +32,6 @@ Feature: Camera
     And I switch to video mode
     When I click the record button
     Then the button should show "Stop"
+    And the recording size should be shown
     When I click the stop button
     Then the video should upload

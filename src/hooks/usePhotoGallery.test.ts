@@ -50,20 +50,18 @@ describe("usePhotoGallery", () => {
   });
 
   it("returns images and loading state", () => {
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     expect(result.current.images).toHaveLength(3);
     expect(result.current.isLoading).toBe(false);
   });
 
   it("opens and closes modal", () => {
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.handleOpenModal(mockImages[0]);
@@ -77,10 +75,9 @@ describe("usePhotoGallery", () => {
   });
 
   it("navigates forward through images", () => {
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.handleOpenModal(mockImages[0]);
@@ -92,10 +89,9 @@ describe("usePhotoGallery", () => {
   });
 
   it("wraps around when navigating forward past last image", () => {
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.handleForwardImage(mockImages[2]);
@@ -104,10 +100,9 @@ describe("usePhotoGallery", () => {
   });
 
   it("navigates backward through images", () => {
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.handleBackImage(mockImages[1]);
@@ -116,10 +111,9 @@ describe("usePhotoGallery", () => {
   });
 
   it("wraps around when navigating backward past first image", () => {
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.handleBackImage(mockImages[0]);
@@ -128,10 +122,9 @@ describe("usePhotoGallery", () => {
   });
 
   it("deletes file after confirmation", async () => {
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     act(() => {
       result.current.handleOpenModal(mockImages[0]);
@@ -148,10 +141,9 @@ describe("usePhotoGallery", () => {
   it("does not delete when confirmation is cancelled", async () => {
     vi.stubGlobal("confirm", vi.fn().mockReturnValue(false));
 
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       await result.current.deleteFile("photo1.jpg");
@@ -164,10 +156,9 @@ describe("usePhotoGallery", () => {
     const mockOpen = vi.fn();
     vi.stubGlobal("open", mockOpen);
 
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       await result.current.downloadFile("photo1.jpg");
@@ -190,16 +181,15 @@ describe("usePhotoGallery", () => {
     });
     vi.stubGlobal("fetch", mockFetch);
 
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       await result.current.downloadAll();
     });
 
-    expect(mockFetch).toHaveBeenCalledWith("https://example.com/zip", {
+    expect(mockFetch).toHaveBeenCalledWith(expect.any(String), {
       method: "POST",
       body: JSON.stringify({ albumName: "wedding" }),
     });
@@ -210,10 +200,9 @@ describe("usePhotoGallery", () => {
     const mockFetch = vi.fn();
     vi.stubGlobal("fetch", mockFetch);
 
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       await result.current.downloadAll();
@@ -230,10 +219,9 @@ describe("usePhotoGallery", () => {
       vi.fn().mockRejectedValue(new Error("Network error")),
     );
 
-    const { result } = renderHook(
-      () => usePhotoGallery("wedding", "https://example.com/zip"),
-      { wrapper: createWrapper() },
-    );
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
 
     await act(async () => {
       await result.current.downloadAll();
@@ -243,5 +231,38 @@ describe("usePhotoGallery", () => {
       "Error downloading zip file: Network error",
     );
     expect(result.current.downloadAllLoading).toBe(false);
+  });
+
+  it("derives a closed lightbox when the open image disappears", () => {
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => {
+      result.current.handleOpenModal({
+        key: "deleted-elsewhere.jpg",
+        date: "2024-01-01",
+        size: 1,
+      });
+    });
+    expect(result.current.openModalImage).toBeUndefined();
+  });
+
+  it("closes the lightbox when stepping from an image no longer listed", () => {
+    const { result } = renderHook(() => usePhotoGallery("wedding"), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => {
+      result.current.handleOpenModal(mockImages[0]);
+    });
+    act(() => {
+      result.current.handleForwardImage({
+        key: "gone.jpg",
+        date: "2024-01-01",
+        size: 1,
+      });
+    });
+    expect(result.current.openModalImage).toBeUndefined();
   });
 });

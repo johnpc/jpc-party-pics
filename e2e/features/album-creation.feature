@@ -21,7 +21,6 @@ Feature: Album Creation
 
   Scenario: Cannot create album with duplicate name
     Given I am on the home page
-    And I wait for albums to load
     When I type "Demo" in the album name input
     Then the create button should be disabled
 

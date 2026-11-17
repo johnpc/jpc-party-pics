@@ -6,7 +6,6 @@ import {
   Text,
   useTheme,
 } from "@aws-amplify/ui-react";
-import { custom } from "../../../../amplify_outputs.json";
 import { SharedImage } from "./SharedImage";
 import { PhotoModal } from "./PhotoModal";
 import { isMobileScreenSize } from "../../../helpers/isMobileScreenSize";
@@ -18,7 +17,7 @@ const itemsPerPage = 24;
 
 export const SharedPhotos = (props: { albumName: string }) => {
   const { tokens } = useTheme();
-  const gallery = usePhotoGallery(props.albumName, custom.zipFileEndpoint);
+  const gallery = usePhotoGallery(props.albumName);
   const imageKeys = gallery.images.map((img) => img.key);
   usePrefetchAdjacentImages(imageKeys, gallery.openModalImage?.key);
 

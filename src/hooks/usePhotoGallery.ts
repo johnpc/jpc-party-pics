@@ -1,28 +1,32 @@
 import { useState } from "react";
-import { getUrl } from "aws-amplify/storage";
-import { Schema } from "../../amplify/data/resource";
+import { backend } from "../backend";
+import { ImageRecord } from "../backend/types";
 import { useDeleteImage, useImages } from "./useImages";
 import { humanFileSize } from "../helpers/humanFileSize";
+import { Lightbox, closed, neighborKey, open } from "../helpers/lightbox";
 
-type ImageType = Schema["Image"]["type"];
-
-export function usePhotoGallery(albumName: string, zipFileEndpoint: string) {
+// @state-machine download-all
+// idle ⇄ zipping (the Download All button); errors surface via alert and
+// return to idle. The lightbox machine lives in helpers/lightbox.ts.
+export function usePhotoGallery(albumName: string) {
   const [downloadAllLoading, setDownloadAllLoading] = useState(false);
-  const [openModalImage, setOpenModalImage] = useState<ImageType>();
+  const [lightbox, setLightbox] = useState<Lightbox>(closed);
 
   const { data: images = [], isLoading } = useImages(albumName);
   const deleteImageMutation = useDeleteImage(albumName);
 
+  // Derived: the open image is looked up in the live list every render.
+  const openModalImage =
+    lightbox.kind === "open"
+      ? images.find((i) => i.key === lightbox.key)
+      : undefined;
+
   const downloadFile = async (key: string) => {
-    const url = await getUrl({
-      path: key,
-      options: {
-        validateObjectExistence: true,
-        expiresIn: 300,
-        useAccelerateEndpoint: true,
-      },
+    const url = await backend.getUrl(key, {
+      validateObjectExistence: true,
+      expiresIn: 300,
     });
-    window.open(url.url, "_blank");
+    window.open(url, "_blank");
   };
 
   const deleteFile = async (key: string) => {
@@ -32,7 +36,7 @@ export function usePhotoGallery(albumName: string, zipFileEndpoint: string) {
     if (!confirmed) return;
 
     await deleteImageMutation.mutateAsync(key);
-    setOpenModalImage(undefined);
+    setLightbox(closed);
   };
 
   const downloadAll = async () => {
@@ -44,12 +48,8 @@ export function usePhotoGallery(albumName: string, zipFileEndpoint: string) {
 
     setDownloadAllLoading(true);
     try {
-      const zipFileResponse = await fetch(zipFileEndpoint, {
-        method: "POST",
-        body: JSON.stringify({ albumName }),
-      });
-      const zipFileResult = await zipFileResponse.json();
-      await downloadFile(zipFileResult.key ?? zipFileResult.data!.key);
+      const zip = await backend.requestZip(albumName);
+      await downloadFile(zip.key);
     } catch (error) {
       alert(`Error downloading zip file: ${(error as Error).message}`);
       console.error(error);
@@ -57,20 +57,10 @@ export function usePhotoGallery(albumName: string, zipFileEndpoint: string) {
     setDownloadAllLoading(false);
   };
 
-  const handleClose = () => setOpenModalImage(undefined);
-
-  const handleOpenModal = (image: ImageType) => setOpenModalImage(image);
-
-  const handleBackImage = (image: ImageType) => {
-    const index = images.findIndex((i) => i.key === image.key);
-    const backIndex = index === 0 ? images.length - 1 : index - 1;
-    handleOpenModal(images[backIndex]);
-  };
-
-  const handleForwardImage = (image: ImageType) => {
-    const index = images.findIndex((i) => i.key === image.key);
-    const forwardIndex = index === images.length - 1 ? 0 : index + 1;
-    handleOpenModal(images[forwardIndex]);
+  const step = (image: ImageRecord, direction: "back" | "forward") => {
+    const keys = images.map((i) => i.key);
+    const next = neighborKey(keys, image.key, direction);
+    setLightbox(next === undefined ? closed : open(next));
   };
 
   return {
@@ -81,9 +71,9 @@ export function usePhotoGallery(albumName: string, zipFileEndpoint: string) {
     downloadFile,
     deleteFile,
     downloadAll,
-    handleClose,
-    handleOpenModal,
-    handleBackImage,
-    handleForwardImage,
+    handleClose: () => setLightbox(closed),
+    handleOpenModal: (image: ImageRecord) => setLightbox(open(image.key)),
+    handleBackImage: (image: ImageRecord) => step(image, "back"),
+    handleForwardImage: (image: ImageRecord) => step(image, "forward"),
   };
 }

@@ -3,13 +3,17 @@
   "language": "en",
   "words": [
     "amplify",
+    "bddgen",
     "hostable",
     "indexeddb",
+    "lavfi",
     "matroska",
     "msvideo",
     "newparty",
     "noextension",
     "partypics",
+    "retryable",
+    "testid",
     "xxxs"
   ],
   "ignorePaths": ["node_modules/**"]

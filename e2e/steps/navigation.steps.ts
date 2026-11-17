@@ -25,5 +25,7 @@ Then("I should see the camera page", async ({ page }) => {
 });
 
 Then("I should see the kiosk view", async ({ page }) => {
-  await expect(page.locator("img, video").first()).toBeVisible();
+  await expect(
+    page.locator('img[alt^="public/"], video').first(),
+  ).toBeVisible();
 });

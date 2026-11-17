@@ -8,12 +8,18 @@ vi.mock("@aws-amplify/ui-react", () => ({
     children,
     onClick,
     isDisabled,
+    ...rest
   }: {
     children: React.ReactNode;
     onClick?: () => void;
     isDisabled?: boolean;
+    "data-recorded-bytes"?: number;
   }) => (
-    <button onClick={onClick} disabled={isDisabled}>
+    <button
+      onClick={onClick}
+      disabled={isDisabled}
+      data-recorded-bytes={rest["data-recorded-bytes"]}
+    >
       {children}
     </button>
   ),
@@ -21,8 +27,7 @@ vi.mock("@aws-amplify/ui-react", () => ({
 
 describe("CaptureControls", () => {
   const baseProps = {
-    status: "idle",
-    recording: false,
+    phase: { kind: "idle" } as const,
     onCapture: vi.fn(),
     onStartRecording: vi.fn(),
     onStopRecording: vi.fn(),
@@ -40,7 +45,11 @@ describe("CaptureControls", () => {
 
   it("renders stop recording when recording", () => {
     renderWithProviders(
-      <CaptureControls {...baseProps} mode="video" recording={true} />,
+      <CaptureControls
+        {...baseProps}
+        mode="video"
+        phase={{ kind: "recording", bytes: 0 }}
+      />,
     );
     expect(screen.getByText(/Stop Recording/)).toBeInTheDocument();
   });
@@ -73,7 +82,7 @@ describe("CaptureControls", () => {
       <CaptureControls
         {...baseProps}
         mode="video"
-        recording={true}
+        phase={{ kind: "recording", bytes: 2048 }}
         onStopRecording={onStopRecording}
       />,
     );
@@ -83,9 +92,38 @@ describe("CaptureControls", () => {
 
   it("disables button when not idle", () => {
     renderWithProviders(
-      <CaptureControls {...baseProps} mode="photo" status="uploading" />,
+      <CaptureControls
+        {...baseProps}
+        mode="photo"
+        phase={{ kind: "uploading" }}
+      />,
     );
     expect(screen.getByText(/Capture/)).toBeDisabled();
+  });
+
+  it("disables the record button while the flash of success shows", () => {
+    renderWithProviders(
+      <CaptureControls
+        {...baseProps}
+        mode="video"
+        phase={{ kind: "success" }}
+      />,
+    );
+    expect(screen.getByText(/Start Recording/)).toBeDisabled();
+  });
+
+  it("exposes the recorded byte count while recording", () => {
+    renderWithProviders(
+      <CaptureControls
+        {...baseProps}
+        mode="video"
+        phase={{ kind: "recording", bytes: 4096 }}
+      />,
+    );
+    expect(screen.getByText(/Stop Recording/)).toHaveAttribute(
+      "data-recorded-bytes",
+      "4096",
+    );
   });
 
   it("uses custom photo label", () => {
@@ -93,5 +131,12 @@ describe("CaptureControls", () => {
       <CaptureControls {...baseProps} mode="photo" photoLabel="Take Photo" />,
     );
     expect(screen.getByText("Take Photo")).toBeInTheDocument();
+  });
+
+  it("disables controls until the camera stream is live", () => {
+    renderWithProviders(
+      <CaptureControls {...baseProps} mode="video" streamLive={false} />,
+    );
+    expect(screen.getByText(/Start Recording/)).toBeDisabled();
   });
 });

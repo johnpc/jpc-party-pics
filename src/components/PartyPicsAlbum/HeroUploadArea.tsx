@@ -6,7 +6,10 @@ interface HeroUploadAreaProps {
   onTapCamera: () => void;
   isUploading: boolean;
   activeCount: number;
-  errorCount: number;
+  /** Failed uploads the Retry button can still re-queue. */
+  retryableCount: number;
+  /** Failed uploads whose retry budget is spent; only re-selecting helps. */
+  exhaustedCount: number;
   onRetry: () => void;
 }
 
@@ -50,11 +53,13 @@ export function HeroUploadArea(props: HeroUploadAreaProps) {
           📸 Camera
         </Button>
       </Flex>
-      {(props.isUploading || props.errorCount > 0) && (
+      {(props.isUploading ||
+        props.retryableCount + props.exhaustedCount > 0) && (
         <UploadStatus
           isUploading={props.isUploading}
           activeCount={props.activeCount}
-          errorCount={props.errorCount}
+          retryableCount={props.retryableCount}
+          exhaustedCount={props.exhaustedCount}
           onRetry={props.onRetry}
         />
       )}
@@ -109,10 +114,12 @@ function FilePickerButton(props: {
 function UploadStatus(props: {
   isUploading: boolean;
   activeCount: number;
-  errorCount: number;
+  retryableCount: number;
+  exhaustedCount: number;
   onRetry: () => void;
 }) {
   const { tokens } = useTheme();
+  const failed = props.retryableCount + props.exhaustedCount;
 
   return (
     <>
@@ -122,7 +129,7 @@ function UploadStatus(props: {
           {props.activeCount !== 1 ? "s" : ""}...
         </Text>
       )}
-      {props.errorCount > 0 && (
+      {failed > 0 && (
         <Flex
           justifyContent="center"
           alignItems="center"
@@ -130,15 +137,20 @@ function UploadStatus(props: {
           marginTop={tokens.space.small}
         >
           <Text color="#ffd6d6" fontSize="small">
-            {props.errorCount} failed
+            {failed} failed
+            {props.exhaustedCount > 0 && props.retryableCount === 0
+              ? " — please re-select"
+              : ""}
           </Text>
-          <Button
-            size="small"
-            onClick={props.onRetry}
-            style={{ color: "white" }}
-          >
-            Retry
-          </Button>
+          {props.retryableCount > 0 && (
+            <Button
+              size="small"
+              onClick={props.onRetry}
+              style={{ color: "white" }}
+            >
+              Retry
+            </Button>
+          )}
         </Flex>
       )}
     </>

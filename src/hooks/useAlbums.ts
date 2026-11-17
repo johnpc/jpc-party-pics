@@ -1,16 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { generateClient } from "aws-amplify/api";
-import { Schema } from "../../amplify/data/resource";
-
-const client = generateClient<Schema>();
+import { backend } from "../backend";
 
 export const useAlbums = () => {
   return useQuery({
     queryKey: ["albums"],
-    queryFn: async () => {
-      const response = await client.models.Albums.list();
-      return response.data ?? [];
-    },
+    queryFn: () => backend.listAlbums(),
   });
 };
 
@@ -18,11 +12,7 @@ export const useCreateAlbum = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (albumName: string) => {
-      const result = await client.models.Albums.create({ albumName });
-      if (result.errors) throw new Error("Failed to create album");
-      return result.data;
-    },
+    mutationFn: (albumName: string) => backend.createAlbum(albumName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["albums"] });
     },

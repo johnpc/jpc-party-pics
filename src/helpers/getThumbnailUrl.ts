@@ -1,14 +1,9 @@
-import { getUrl } from "aws-amplify/storage";
+import { backend } from "../backend";
 
-export const getThumbnailUrl = async (key: string): Promise<URL> => {
+export const getThumbnailUrl = (key: string): Promise<URL> => {
   const thumbnailKey = `thumbnails/${key.replace(/^public\//, "")}`;
-  const url = await getUrl({
-    path: thumbnailKey,
-    options: {
-      validateObjectExistence: true,
-      expiresIn: 3600,
-      useAccelerateEndpoint: true,
-    },
+  return backend.getUrl(thumbnailKey, {
+    validateObjectExistence: true,
+    expiresIn: 3600,
   });
-  return url.url;
 };

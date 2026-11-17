@@ -1,106 +1,45 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  uploadPhoto,
-  uploadVideo,
-  isVideoTooShort,
-} from "../helpers/cameraUpload";
+  CaptureMode,
+  CapturePhase,
+  SUCCESS_FLASH_MS,
+  idle,
+  recordedChunk,
+  startRecording as recordingPhase,
+} from "../helpers/captureSession";
+import {
+  UploadContext,
+  createRecorder,
+  makeHash,
+  processPhotoBlob,
+} from "./cameraPipeline";
 import { useUploadImage } from "./useImages";
 import { useCameraStream } from "./useCameraStream";
 
-type Mode = "photo" | "video";
-type Status = "idle" | "uploading" | "success";
-
-function makeHash(length: number): string {
-  let result = "";
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const charactersLength = characters.length;
-  let counter = 0;
-  while (counter < length) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    counter += 1;
-  }
-  return result;
-}
-
-function selectMimeType(): { mimeType: string; ext: string } {
-  const mimeType = MediaRecorder.isTypeSupported("video/mp4")
-    ? "video/mp4"
-    : "video/webm";
-  const ext = mimeType === "video/mp4" ? "mp4" : "webm";
-  return { mimeType, ext };
-}
-
-interface UploadContext {
-  albumName: string;
-  hash: string;
-  register: (key: string) => Promise<unknown>;
-  setStatus: (s: Status) => void;
-}
-
-async function processPhotoBlob(
-  blob: Blob | null,
-  ctx: UploadContext,
-): Promise<void> {
-  if (!blob) return;
-  ctx.setStatus("uploading");
-  try {
-    const key = await uploadPhoto(blob, ctx.albumName, ctx.hash);
-    await ctx.register(key);
-    ctx.setStatus("success");
-    setTimeout(() => ctx.setStatus("idle"), 1500);
-  } catch (error) {
-    console.error("Upload failed:", error);
-    ctx.setStatus("idle");
-  }
-}
-
-async function processVideoChunks(
-  chunks: Blob[],
-  mimeType: string,
-  ext: string,
-  ctx: UploadContext,
-): Promise<void> {
-  const blob = new Blob(chunks, { type: mimeType });
-  if (isVideoTooShort(blob)) {
-    console.warn(`Recording too short (${blob.size} bytes), discarding`);
-    ctx.setStatus("idle");
-    return;
-  }
-  ctx.setStatus("uploading");
-  try {
-    const key = await uploadVideo(blob, mimeType, ext, ctx.albumName, ctx.hash);
-    await ctx.register(key);
-    ctx.setStatus("success");
-    setTimeout(() => ctx.setStatus("idle"), 1500);
-  } catch (error) {
-    console.error("Upload failed:", error);
-    ctx.setStatus("idle");
-  }
-}
-
+// @state-machine capture-mode
+// photo ⇄ video, user-selected; orthogonal to the capture phase.
 export function useCamera(albumName: string) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
 
-  const { videoRef, streamRef, streaming, startCamera, stopCamera } =
-    useCameraStream();
+  const cameraStream = useCameraStream();
+  const { videoRef, streamRef } = cameraStream;
 
-  const [mode, setMode] = useState<Mode>("photo");
-  const [recording, setRecording] = useState(false);
-  const [status, setStatus] = useState<Status>("idle");
+  const [mode, setMode] = useState<CaptureMode>("photo");
+  const [phase, setPhase] = useState<CapturePhase>(idle);
   const [hash] = useState(makeHash(5));
 
-  const uploadImage = useUploadImage(albumName);
+  // The success flash owns its timer: a new phase or an unmount cancels it,
+  // so it can never knock a later upload back to idle.
+  useEffect(() => {
+    if (phase.kind !== "success") return;
+    const timer = setTimeout(() => setPhase(idle), SUCCESS_FLASH_MS);
+    return () => clearTimeout(timer);
+  }, [phase]);
 
+  const uploadImage = useUploadImage(albumName);
   const ctx = useMemo<UploadContext>(
-    () => ({
-      albumName,
-      hash,
-      register: uploadImage.mutateAsync,
-      setStatus,
-    }),
+    () => ({ albumName, hash, register: uploadImage.mutateAsync, setPhase }),
     [albumName, hash, uploadImage.mutateAsync],
   );
 
@@ -116,26 +55,18 @@ export function useCamera(albumName: string) {
 
   const startRecording = useCallback(() => {
     if (!streamRef.current) return;
-    const { mimeType, ext } = selectMimeType();
-    chunksRef.current = [];
-    const mediaRecorder = new MediaRecorder(streamRef.current, { mimeType });
-    mediaRecorderRef.current = mediaRecorder;
-
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
-    };
-    mediaRecorder.onstop = () => {
-      processVideoChunks([...chunksRef.current], mimeType, ext, ctx);
-    };
-    mediaRecorder.start(1000);
-    setRecording(true);
+    const recorder = createRecorder(streamRef.current, ctx, (size) =>
+      setPhase((p) => recordedChunk(p, size)),
+    );
+    mediaRecorderRef.current = recorder;
+    recorder.start(1000);
+    setPhase(recordingPhase());
   }, [streamRef, ctx]);
 
   const stopRecording = useCallback(() => {
     const recorder = mediaRecorderRef.current;
     if (!recorder || recorder.state !== "recording") return;
     recorder.stop();
-    setRecording(false);
   }, []);
 
   return {
@@ -143,11 +74,11 @@ export function useCamera(albumName: string) {
     canvasRef,
     mode,
     setMode,
-    streaming,
-    recording,
-    status,
-    startCamera,
-    stopCamera,
+    stream: cameraStream.stream,
+    streaming: cameraStream.streaming,
+    phase,
+    startCamera: cameraStream.startCamera,
+    stopCamera: cameraStream.stopCamera,
     capturePhoto,
     startRecording,
     stopRecording,

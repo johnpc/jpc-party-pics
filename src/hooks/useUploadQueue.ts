@@ -6,25 +6,17 @@ import {
   getAllQueued,
   updateQueueItem,
 } from "../helpers/uploadQueue";
+import {
+  isActive,
+  isExhausted,
+  isProcessable,
+  isRetryable,
+  toPending,
+} from "../helpers/uploadItemState";
 import { cacheFile } from "../helpers/fileCache";
 import { processUploadItem } from "./useUploadProcessor";
 
-const MAX_RETRIES = 3;
 const MAX_CONCURRENT = 3;
-
-function findProcessable(
-  items: QueuedUpload[],
-  albumName: string,
-  inFlight: Set<string>,
-): QueuedUpload[] {
-  return items.filter(
-    (i) =>
-      i.albumName === albumName &&
-      (i.status === "pending" || i.status === "error") &&
-      i.retryCount < MAX_RETRIES &&
-      !inFlight.has(i.id),
-  );
-}
 
 const makeHash = (length: number): string => {
   let result = "";
@@ -36,10 +28,12 @@ const makeHash = (length: number): string => {
   return result;
 };
 
+// @state-machine upload-scheduler
+// Which items are in flight is ONE set; the concurrency count is its size.
 export function useUploadQueue(albumName: string) {
   const [queue, setQueue] = useState<QueuedUpload[]>([]);
-  const activeUploads = useRef(0);
   const hashRef = useRef(makeHash(5));
+  // The ONE record of what is running; the concurrency count is its size.
   const inFlightIds = useRef(new Set<string>());
   const queryClient = useQueryClient();
 
@@ -55,19 +49,21 @@ export function useUploadQueue(albumName: string) {
   const processNextRef = useRef<() => Promise<void>>();
 
   const processNext = useCallback(async () => {
-    if (activeUploads.current >= MAX_CONCURRENT) return;
+    const inFlight = inFlightIds.current;
+    if (inFlight.size >= MAX_CONCURRENT) return;
 
     const items = await getAllQueued();
-    const pending = findProcessable(items, albumName, inFlightIds.current);
+    const pending = items.filter(
+      (i) =>
+        i.albumName === albumName && isProcessable(i) && !inFlight.has(i.id),
+    );
 
     for (const item of pending) {
-      if (activeUploads.current >= MAX_CONCURRENT) break;
-      activeUploads.current++;
-      inFlightIds.current.add(item.id);
+      if (inFlight.size >= MAX_CONCURRENT) break;
+      inFlight.add(item.id);
       processUploadItem(item, albumName, hashRef.current, refreshQueue).finally(
         () => {
-          activeUploads.current--;
-          inFlightIds.current.delete(item.id);
+          inFlight.delete(item.id);
           refreshQueue();
           queryClient.invalidateQueries({ queryKey: ["images", albumName] });
           setTimeout(() => processNextRef.current?.(), 0);
@@ -112,28 +108,24 @@ export function useUploadQueue(albumName: string) {
   const retryFailed = useCallback(async () => {
     const items = await getAllQueued();
     const failed = items.filter(
-      (i) =>
-        i.albumName === albumName &&
-        i.status === "error" &&
-        i.retryCount < MAX_RETRIES,
+      (i) => i.albumName === albumName && isRetryable(i),
     );
     for (const item of failed) {
-      await updateQueueItem(item.id, { status: "pending" });
+      await updateQueueItem(item.id, toPending());
     }
     await refreshQueue();
     processNext();
   }, [albumName, refreshQueue, processNext]);
 
-  const activeCount = queue.filter(
-    (i) => i.status !== "complete" && i.status !== "error",
-  ).length;
+  const activeCount = queue.filter(isActive).length;
 
   return {
     queue,
     addFiles,
     retryFailed,
     activeCount,
-    errorCount: queue.filter((i) => i.status === "error").length,
+    retryableCount: queue.filter(isRetryable).length,
+    exhaustedCount: queue.filter(isExhausted).length,
     completedCount: queue.filter((i) => i.status === "complete").length,
     isUploading: activeCount > 0,
   };

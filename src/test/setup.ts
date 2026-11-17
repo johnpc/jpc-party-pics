@@ -59,8 +59,3 @@ vi.mock("aws-amplify/storage", () => ({
 vi.mock("aws-amplify", () => ({
   Amplify: { configure: vi.fn() },
 }));
-
-vi.mock("../../amplify_outputs.json", () => ({
-  default: { custom: { zipFileEndpoint: "https://example.com/zip" } },
-  custom: { zipFileEndpoint: "https://example.com/zip" },
-}));

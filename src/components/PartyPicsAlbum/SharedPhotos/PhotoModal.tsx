@@ -11,6 +11,7 @@ import {
   getCloseButtonStyle,
   getArrowStyle,
   getArrowSize,
+  getStageStyle,
   getFooterStyle,
   getDownloadButtonStyle,
 } from "./photoModalStyles";
@@ -73,10 +74,15 @@ export const PhotoModal = ({
           flex="1"
           width="100%"
           gap={tokens.space.xs}
+          style={getStageStyle()}
           onTouchStart={swipeHandlers.onTouchStart}
           onTouchEnd={swipeHandlers.onTouchEnd}
         >
-          <Text as="span" onClick={() => onBack(image)} style={getArrowStyle()}>
+          <Text
+            as="span"
+            onClick={() => onBack(image)}
+            style={getArrowStyle("left")}
+          >
             <ArrowBackIosIcon fontSize={getArrowSize()} />
           </Text>
 
@@ -85,7 +91,7 @@ export const PhotoModal = ({
           <Text
             as="span"
             onClick={() => onForward(image)}
-            style={getArrowStyle()}
+            style={getArrowStyle("right")}
           >
             <ArrowForwardIosIcon fontSize={getArrowSize()} />
           </Text>

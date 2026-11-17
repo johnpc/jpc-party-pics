@@ -1,12 +1,19 @@
-import { expect } from "@playwright/test";
+import { expect, Page } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
 import path from "path";
 import { fileURLToPath } from "url";
+import { galleryImg } from "./selectors";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const { Given, When, Then } = createBdd();
+
+async function openFirstPhoto(page: Page) {
+  const img = page.locator(galleryImg).first();
+  await img.waitFor({ state: "visible", timeout: 15000 });
+  await img.click();
+}
 
 Given("I navigate to an album with no photos", async ({ page }) => {
   await page.goto("/empty-test-album");
@@ -18,9 +25,7 @@ Given("I navigate to an album with photos", async ({ page }) => {
 
 Given("the photo modal is open", async ({ page }) => {
   await page.goto("/Demo");
-  const img = page.locator("img[src*='s3']").first();
-  await img.waitFor({ state: "visible", timeout: 15000 });
-  await img.click();
+  await openFirstPhoto(page);
 });
 
 Given("I have uploaded a photo to the test album", async ({ page }) => {
@@ -28,39 +33,23 @@ Given("I have uploaded a photo to the test album", async ({ page }) => {
   const fileInput = page.locator('input[type="file"]');
   const fixturePath = path.resolve(__dirname, "../fixtures/test-photo.jpg");
   await fileInput.setInputFiles(fixturePath);
-  await page.locator("img[src*='s3']").first().waitFor({
+  await page.locator(galleryImg).first().waitFor({
     state: "visible",
     timeout: 15000,
   });
 });
 
+// Stays on the page when already there so the just-uploaded photo is the one
+// opened.
 Given("the photo modal is open on a test album", async ({ page }) => {
-  await page.goto("/e2e-test");
-  const img = page.locator("img[src*='s3']").first();
-  await img.waitFor({ state: "visible", timeout: 15000 });
-  await img.click();
+  if (!new URL(page.url()).pathname.startsWith("/e2e-test")) {
+    await page.goto("/e2e-test");
+  }
+  await openFirstPhoto(page);
 });
 
 When("I click on a photo", async ({ page }) => {
-  const img = page.locator("img[src*='s3']").first();
-  await img.waitFor({ state: "visible", timeout: 15000 });
-  await img.click();
-});
-
-When("I click the forward arrow", async ({ page }) => {
-  await page.locator("[data-testid='ArrowForwardIosIcon']").click();
-});
-
-When("I click the back arrow", async ({ page }) => {
-  await page.locator("[data-testid='ArrowBackIosIcon']").click();
-});
-
-When("I click outside the modal", async ({ page }) => {
-  await page.keyboard.press("Escape");
-});
-
-When("I click the download button", async ({ page }) => {
-  await page.getByRole("button", { name: /Download/ }).click();
+  await openFirstPhoto(page);
 });
 
 When("I confirm and delete the photo", async ({ page }) => {
@@ -73,57 +62,35 @@ When("I dismiss and click delete", async ({ page }) => {
   await page.getByRole("button", { name: /Delete/ }).click();
 });
 
-When("I confirm and click download all", async ({ page }) => {
-  page.once("dialog", (dialog) => dialog.accept());
-  await page.getByRole("button", { name: /Download All/ }).click();
-});
-
 Then("I should see photos in a grid layout", async ({ page }) => {
-  await expect(page.locator("img[src*='s3']").first()).toBeVisible({
+  await expect(page.locator(galleryImg).first()).toBeVisible({
     timeout: 15000,
   });
 });
 
-// Verified visually: first photo has the most recent date
-Then("photos should be sorted newest first", async () => {});
-
-Then("I should see the photo modal", async ({ page }) => {
-  await expect(page.locator(".MuiModal-root")).toBeVisible();
+// Compares the rendered order with the backend's own date order (fake only;
+// the real backend's list is not reachable from the test).
+Then("photos should be sorted newest first", async ({ page }) => {
+  const shown = await page
+    .locator(galleryImg)
+    .evaluateAll((imgs) => imgs.map((i) => i.getAttribute("alt")));
+  const expected = await page.evaluate(async () => {
+    const fake = window.__partypicsFake;
+    if (!fake) return null;
+    const images = await fake.listImages("Demo");
+    return images
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .map((i) => i.key);
+  });
+  expect(shown.length).toBeGreaterThan(1);
+  if (expected) expect(shown).toEqual(expected.slice(0, shown.length));
 });
-
-Then("I should see navigation arrows", async ({ page }) => {
-  await expect(page.locator("[data-testid='ArrowBackIosIcon']")).toBeVisible();
-  await expect(
-    page.locator("[data-testid='ArrowForwardIosIcon']"),
-  ).toBeVisible();
-});
-
-Then("I should see a download button", async ({ page }) => {
-  await expect(page.getByRole("button", { name: /Download/ })).toBeVisible();
-});
-
-Then("I should see a delete button", async ({ page }) => {
-  await expect(page.getByRole("button", { name: /Delete/ })).toBeVisible();
-});
-
-// Modal image changes — verified visually
-Then("I should see the next photo", async () => {});
-Then("I should see the previous photo", async () => {});
-
-Then("the modal should close", async ({ page }) => {
-  await expect(page.locator(".MuiModal-root")).not.toBeVisible();
-});
-
-// Opens in new window — cannot assert in single-tab context
-Then("the photo should open in a new tab", async () => {});
 
 Then("the photo should be removed from the album", async ({ page }) => {
   await expect(page.locator(".MuiModal-root")).not.toBeVisible();
+  await expect(page.locator(galleryImg)).toHaveCount(0);
 });
 
 Then("the photo should still be in the album", async ({ page }) => {
-  await expect(page.locator("img").first()).toBeVisible();
+  await expect(page.locator(galleryImg).first()).toBeVisible();
 });
-
-// Download triggered — verified via network request
-Then("a zip file should begin downloading", async () => {});

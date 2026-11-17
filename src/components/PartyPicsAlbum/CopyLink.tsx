@@ -1,6 +1,8 @@
 import { Button, useTheme } from "@aws-amplify/ui-react";
-import { useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useTransientFlag } from "../../hooks/useTransientFlag";
+
+const COPIED_FLASH_MS = 1000;
 
 export const CopyLink = (props: {
   link: string;
@@ -8,16 +10,9 @@ export const CopyLink = (props: {
   variation?: "primary" | "link";
 }) => {
   const { tokens } = useTheme();
-  const [copied, setCopied] = useState(false);
-  const fileUrl = props.link;
+  const [copied, flashCopied] = useTransientFlag(COPIED_FLASH_MS);
   return (
-    <CopyToClipboard
-      text={fileUrl}
-      onCopy={() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1000);
-      }}
-    >
+    <CopyToClipboard text={props.link} onCopy={flashCopied}>
       <Button
         marginBottom={tokens.space.medium}
         marginTop={tokens.space.medium}

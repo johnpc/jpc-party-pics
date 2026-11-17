@@ -9,6 +9,8 @@ Photo and video sharing app for events. Users create albums, share a link, and g
 - **Complexity is the enemy.** Keep files under ~100 lines. Refactor aggressively to make code simpler and more testable. Three small files beat one big file.
 - **Quality gates exist for a reason.** Never bypass pre-commit hooks, skip tests, or lower coverage thresholds to make something pass faster.
 - **Every user-facing feature needs a Gherkin `.feature` file** in `e2e/features/`. No exceptions.
+- **There is no such thing as a flaky test.** Intermittent = a race to find and fix; never re-run, sleep, raise a timeout, retry, or skip. Steps wait on real conditions. (Full rule: `AGENTS.md`.)
+- **One mode, one owner.** Every status/phase is an explicit discriminated union catalogued in `docs/state-machines.md` and marked `// @state-machine <id>`; `npm run check-state-machines` enforces it.
 
 ## Verification Checklist (run before pushing)
 
@@ -17,9 +19,13 @@ npx prettier --check "src/**/*.{ts,tsx}"   # Formatting
 npm run lint                                # ESLint + cspell
 npm run test:coverage                       # Unit tests + 80% coverage thresholds
 npm run check-crap                          # CRAP score ≤ 15 per function
+npm run check-file-length                   # ≤ 160 lines per source file
+npm run check-state-machines                # docs/state-machines.md ↔ @state-machine markers
 npm run build                               # TypeScript + Vite build
-npm run e2e                                 # Playwright-BDD E2E tests
+npm run e2e                                 # Playwright-BDD E2E tests (fake backend)
 ```
+
+Or all of the above in one go: `npm run quality`.
 
 ## How the App Works
 
@@ -49,7 +55,7 @@ npm run e2e                                 # Playwright-BDD E2E tests
 - Native camera access via `getUserMedia` (rear-facing preferred)
 - Photo mode: captures frame from video stream → JPEG blob → compress → upload to S3 → register in DynamoDB
 - Video mode: records via MediaRecorder (prefers `video/mp4`, falls back to `video/webm`) → uploads when stopped
-- Status feedback: idle → uploading → success (1.5s)
+- Capture phase (`src/helpers/captureSession.ts`): idle → recording(bytes) → uploading → success (1.5 s flash) → idle; stream: off → live | denied
 
 **4. Kiosk Mode** (`/{albumName}/kiosk`)
 
@@ -110,13 +116,19 @@ Generate local config: `npm run prod-config` (requires `--profile personal` AWS 
   - `src/helpers/` — pure utility functions
   - `src/components/` — React components (render only, logic in hooks)
 
+### Backend seam (real vs fake)
+
+- `src/backend/types.ts` is the ONE interface the app talks to; `src/backend/index.ts` selects the implementation from `VITE_BACKEND`.
+- `src/backend/amplify/` — real AppSync/S3/zip Function URL. The only place Amplify is imported or configured. Reads the generated `amplify_outputs.json` through the `$amplify-outputs` alias, falling back to the committed `src/backend/amplify/outputs.fallback.json` so the build never needs AWS credentials.
+- `src/backend/fake/` — in-memory + `localStorage` store with a deterministic seed (`fakeSeed.ts`); media served by `vite/fakeS3Plugin.ts` from `e2e/fixtures/` (basename match) or as generated SVG photos. `npm run dev:fake` to use it by hand.
+
 ### E2E Tests (Playwright-BDD)
 
 - **Features:** `e2e/features/*.feature` (Gherkin syntax)
 - **Step definitions:** `e2e/steps/*.steps.ts`
-- **Config:** `playwright.config.ts`
-- Tests run against the real production backend (not mocked). Use `npm run prod-config` to generate `amplify_outputs.json` before running.
-- Run with: `npm run e2e`
+- **Config:** `playwright.config.ts` — `retries: 0`, trace on failure
+- Default (`npm run e2e`, CI): the in-process fake backend — zero network, deterministic seed, no credentials.
+- `npm run e2e:real`: the same suite against the live backend; needs `npm run prod-config` first. Changes to production data can break it.
 
 ## Source Code Map
 
@@ -149,7 +161,8 @@ Generate local config: `npm run prod-config` (requires `--profile personal` AWS 
 | `src/hooks/useUploadProcessor.ts` | Single-file upload pipeline: compress → upload to S3 → register in DynamoDB                       |
 | `src/hooks/usePhotoGallery.ts`    | Gallery state: modal open/close, navigation, download, delete, download-all                       |
 | `src/hooks/useCamera.ts`          | Camera stream management, photo capture (canvas → JPEG), video recording (MediaRecorder)          |
-| `src/hooks/useCreateAlbumForm.ts` | Form state + validation for album creation                                                        |
+| `src/hooks/useCreateAlbumForm.ts` | Form state + validation for album creation (`album-submission` machine; validity derived)         |
+| `src/hooks/useTransientFlag.ts`   | off → on → off-after-N-ms flag whose timer is owned by an effect (CopyLink)                       |
 
 ### Key Helpers
 
@@ -163,6 +176,12 @@ Generate local config: `npm run prod-config` (requires `--profile personal` AWS 
 | `src/helpers/getAccelerateUrl.ts`   | Wraps `getUrl()` with Transfer Acceleration + 5-min expiry                                |
 | `src/helpers/humanFileSize.ts`      | Bytes → human-readable string (KiB, MiB, etc.)                                            |
 | `src/helpers/isMobileScreenSize.ts` | Simple viewport width check for responsive layout decisions                               |
+| `src/helpers/route.ts`              | `parseRoute(pathname)` → home / album / camera / kiosk                                    |
+| `src/helpers/captureSession.ts`     | Camera capture phase union + transitions                                                  |
+| `src/helpers/uploadItemState.ts`    | Upload item status patches + classifiers (active / retryable / exhausted)                 |
+| `src/helpers/lightbox.ts`           | Lightbox closed / open(key) + neighbor stepping                                           |
+| `src/helpers/imageZoom.ts`          | Zoom rest / zoomed / panning reducer + double-tap timeline                                |
+| `src/helpers/mediaKind.ts`          | image / video / unsupported-video classifier shared by all media components               |
 
 ### Backend Functions
 
@@ -301,9 +320,9 @@ Defined in `amplify/backend.ts`:
 ## Gotchas & Legacy Details
 
 - **S3 key format changed over time.** Older uploads used `public/{albumName}{filename}` (no slash between album and file, e.g. `public/DemoIMG_0282.jpeg`). Newer uploads use `public/{albumName}/{hash}/{id}-{filename}`. The `getPartyPicsImages` Lambda uses `Prefix: public/${albumName}` which matches both formats — this is intentional and must not be changed.
-- **E2E tests run against real prod backend.** They spin up a local dev server (`localhost:5173`) with `amplify_outputs.json` generated from the live deployment. Changes to production data (like deleting S3 objects) can break E2E tests.
-- **Camera uses fake streams in CI.** Playwright config uses `--use-fake-device-for-media-stream` so recordings produce low-bitrate data. The E2E camera test needs a few seconds of recording to exceed the 50KB minimum threshold.
-- **The pagination E2E test depends on the Demo album having >24 photos in production S3.** If photos are deleted from the Demo album, this test will fail.
+- **E2E tests run against the fake backend by default.** `npm run e2e:real` targets the live deployment via a generated `amplify_outputs.json`; production data changes (like deleting S3 objects) can break that mode.
+- **Camera uses fake streams in CI.** Playwright config uses `--use-fake-device-for-media-stream` so recordings produce low-bitrate data. The camera step polls the Stop button's `data-recorded-bytes` attribute until the recorder has passed the 50KB minimum — never a fixed sleep.
+- **The fake Demo album is seeded with 30 photos** (`DEMO_IMAGE_COUNT`) so pagination (24/page) is always exercised; in real mode this depends on the production Demo album.
 
 ## File Size Discipline
 

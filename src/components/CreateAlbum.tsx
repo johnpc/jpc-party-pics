@@ -58,7 +58,9 @@ export const CreateAlbum = () => {
                 hasError={!form.isValidPartyName}
               />
               <Button
-                disabled={!form.isValidPartyName}
+                disabled={!form.isValidPartyName || form.isSubmitting}
+                isLoading={form.isSubmitting}
+                loadingText="Creating..."
                 onClick={form.onCreatePartyAlbum}
               >
                 Create Party Album

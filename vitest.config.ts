@@ -11,6 +11,10 @@ export default defineConfig({
         __dirname,
         "amplify/function/__mocks__/env.ts",
       ),
+      "$amplify-outputs": resolve(
+        __dirname,
+        "src/backend/amplify/outputs.fallback.json",
+      ),
     },
   },
   test: {
@@ -33,6 +37,7 @@ export default defineConfig({
         "src/test/**",
         "src/main.tsx",
         "amplify/function/resource.ts",
+        "src/backend/index.ts",
       ],
     },
   },
