@@ -3,6 +3,10 @@ import { createBdd } from "playwright-bdd";
 
 const { Given, When, Then } = createBdd();
 
+// Uploads below this size are discarded by the app (see cameraUpload.ts), so
+// the harness waits for the recorder to have produced at least this much.
+const MIN_VIDEO_BYTES = 50_000;
+
 Given("I navigate to {string}", async ({ page }, path: string) => {
   await page.goto(path);
 });
@@ -35,8 +39,14 @@ When("I click the record button", async ({ page }) => {
 });
 
 When("I click the stop button", async ({ page }) => {
-  await page.waitForTimeout(3000);
-  await page.getByRole("button", { name: /Stop/ }).click();
+  const stop = page.getByRole("button", { name: /Stop/ });
+  // Real condition, not a sleep: the app exposes the bytes recorded so far.
+  await expect
+    .poll(async () => Number(await stop.getAttribute("data-recorded-bytes")), {
+      timeout: 20000,
+    })
+    .toBeGreaterThan(MIN_VIDEO_BYTES);
+  await stop.click();
 });
 
 Then("the camera should start", async ({ page }) => {
@@ -71,10 +81,10 @@ Then("the button should show {string}", async ({ page }, text: string) => {
   await expect(page.getByRole("button", { name: text })).toBeVisible();
 });
 
-Then("the video should upload", async ({ page }) => {
-  await expect(page.getByText("Success!")).toBeVisible({ timeout: 15000 });
+Then("the recording size should be shown", async ({ page }) => {
+  await expect(page.getByText(/Recording\.\.\. \d+ KB captured/)).toBeVisible();
 });
 
-Then("the photo should appear in the album", async () => {
-  // Verified by subscription updating the gallery
+Then("the video should upload", async ({ page }) => {
+  await expect(page.getByText("Success!")).toBeVisible({ timeout: 15000 });
 });

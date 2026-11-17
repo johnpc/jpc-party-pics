@@ -1,9 +1,8 @@
 import { expect } from "@playwright/test";
 import { createBdd } from "playwright-bdd";
+import { modalImg } from "./selectors";
 
 const { When, Then } = createBdd();
-
-const modalImg = ".MuiModal-root img[src*='s3']";
 
 async function swipe(page: import("@playwright/test").Page, dir: "L" | "R") {
   await page.locator(modalImg).first().waitFor();

@@ -7,14 +7,6 @@ Given("I am on the home page", async ({ page }) => {
   await page.goto("/");
 });
 
-Given("I wait for albums to load", async ({ page }) => {
-  await page.waitForResponse(
-    (response) =>
-      response.url().includes("appsync") && response.status() === 200,
-    { timeout: 10000 },
-  );
-});
-
 When(
   "I type {string} in the album name input",
   async ({ page }, text: string) => {
@@ -37,10 +29,12 @@ Then(
   },
 );
 
+// Validity is derived from the loaded album list, so this assertion simply
+// waits for the state the app converges on — no "wait for albums" step.
 Then("the create button should be disabled", async ({ page }) => {
   await expect(
     page.getByRole("button", { name: /Create Party Album/ }),
-  ).toBeDisabled({ timeout: 10000 });
+  ).toBeDisabled();
 });
 
 Then("the create button should be enabled", async ({ page }) => {
