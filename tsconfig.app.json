@@ -13,6 +13,10 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "paths": {
+      "$amplify-outputs": ["./src/backend/amplify/outputs.fallback.json"]
+    },
 
     /* Linting */
     "strict": true,

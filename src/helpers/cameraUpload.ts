@@ -1,4 +1,4 @@
-import { uploadData } from "aws-amplify/storage";
+import { backend } from "../backend";
 import { compressMedia } from "./compressMedia";
 
 const MIN_VIDEO_SIZE = 50_000;
@@ -16,17 +16,8 @@ export async function uploadPhoto(
     key: `public/${albumName}/${hash}/${file.name}`,
   });
 
-  await uploadData({
-    path: key,
-    data: compressed,
-    options: { useAccelerateEndpoint: true },
-  }).result;
-
+  await backend.upload(key, compressed);
   return key;
-}
-
-export interface VideoUploadResult {
-  key: string;
 }
 
 export function isVideoTooShort(blob: Blob): boolean {
@@ -45,11 +36,6 @@ export async function uploadVideo(
   });
   const key = `public/${albumName}/${hash}/${file.name}`;
 
-  await uploadData({
-    path: key,
-    data: file,
-    options: { useAccelerateEndpoint: true },
-  }).result;
-
+  await backend.upload(key, file);
   return key;
 }

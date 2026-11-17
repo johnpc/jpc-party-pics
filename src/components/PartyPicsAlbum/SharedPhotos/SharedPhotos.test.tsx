@@ -87,10 +87,6 @@ vi.mock("@mui/icons-material/ArrowForwardIos", () => ({
   default: () => <span data-testid="arrow-forward">Forward</span>,
 }));
 
-vi.mock("../../../../amplify_outputs.json", () => ({
-  custom: { zipFileEndpoint: "https://example.com/zip" },
-}));
-
 vi.mock("aws-amplify/storage", () => ({
   getUrl: (...args: unknown[]) => mockGetUrl(...args),
 }));

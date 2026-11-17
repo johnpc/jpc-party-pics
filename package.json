@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:fake": "VITE_BACKEND=fake vite",
     "build": "tsc -b && vite build",
     "lint": "eslint . && npm run spell-check",
     "preview": "vite preview",
@@ -13,7 +14,10 @@
     "test:coverage": "vitest run --coverage",
     "check-crap": "tsx scripts/check-crap.ts",
     "check-file-length": "tsx scripts/check-file-length.ts",
+    "check-state-machines": "tsx scripts/check-state-machines.ts",
+    "quality": "npx prettier --check . && npm run lint && npm run test:coverage && npm run check-crap && npm run check-file-length && npm run check-state-machines && npm run build && npm run e2e",
     "e2e": "npx bddgen && npx playwright test",
+    "e2e:real": "E2E_BACKEND=real npm run e2e",
     "sandbox": "ampx sandbox --profile personal --once",
     "prod-config": "ampx generate outputs --app-id d131sf2ylw1gxp --branch main --profile personal",
     "prepare": "husky install",

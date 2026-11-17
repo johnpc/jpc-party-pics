@@ -7,10 +7,6 @@ vi.mock("aws-amplify", () => ({
   Amplify: { configure: vi.fn() },
 }));
 
-vi.mock("../amplify_outputs.json", () => ({
-  default: {},
-}));
-
 vi.mock("@aws-amplify/ui-react", () => ({
   Divider: () => <hr />,
   Loader: () => <div data-testid="loader">Loading...</div>,
