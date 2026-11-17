@@ -8,9 +8,13 @@ on:
 
 # No AWS credentials anywhere in CI: the build uses the committed outputs
 # fallback and the E2E suite runs against the in-process fake backend.
+#
+# Pinned to ubuntu-24.04: ubuntu-latest moved to 26.04, for which the pinned
+# Playwright release ships no Chromium build (`playwright install` fails).
+# Bump the pin together with @playwright/test.
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
@@ -43,7 +47,7 @@ jobs:
         run: npm run build
 
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
